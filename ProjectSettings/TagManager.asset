@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags: []
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: Leg
+    uniqueID: 1171172029
+    locked: 0
+  - name: Body
+    uniqueID: 241810167
+    locked: 0
+  - name: Head
+    uniqueID: 2702089251
+    locked: 0
+  - name: Weapon
+    uniqueID: 534311379
+    locked: 0
+  - name: Hand
+    uniqueID: 3790253231
+    locked: 0
