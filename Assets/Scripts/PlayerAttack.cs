@@ -6,9 +6,16 @@ using UnityEngine;
 public class PlayerAttack : MonoBehaviour
 {
     private Animator animator;
+    private PlayerStats stats;
+    private PlayerHandControl handControl;
+    public WeaponStats weaponStats;
     private void Awake()
     {
         animator = GetComponent<Animator>();    
+        stats = GetComponent<PlayerStats>();
+        handControl = GetComponent<PlayerHandControl>();
+        //weaponStats = transform.Find("Player Hand/Player Hand Flip/Player Hand Position/Player Hand Sprite/Player Weapon").GetComponent<WeaponStats>();
+        animator.SetFloat("AttackSpeedMultiplier", weaponStats.speed);
     }
     private void Update()
     {
@@ -16,6 +23,15 @@ public class PlayerAttack : MonoBehaviour
         {
             animator.SetLayerWeight(1, 1);
             animator.SetBool("IsAttacking", true);
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("Obstacle"))
+        {
+            handControl.SetCanFollow();
+            EndAttack();
         }
     }
 
