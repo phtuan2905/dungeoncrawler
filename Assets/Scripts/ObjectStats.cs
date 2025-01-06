@@ -8,6 +8,7 @@ public class ObjectStats : MonoBehaviour
 
     [Header("Object Attributes")]
     [SerializeField] private int health;
+    public int damage;
     public float speed;
 
     private void Start()

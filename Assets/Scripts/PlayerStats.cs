@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerStats : MonoBehaviour
@@ -21,5 +22,26 @@ public class PlayerStats : MonoBehaviour
     private void Awake()
     {
         
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy") && collision.name == "Enemy Weapon")
+        {
+            GetDamage(collision.GetComponent<ObjectStats>().damage);
+        }
+    }
+
+    void GetDamage(int damage)
+    {
+        if (health - damage > 0)
+        {
+            health -= damage;
+        } 
+        else
+        {
+            health = 0;
+            Debug.Log("You Die");
+        }
     }
 }
