@@ -9,6 +9,7 @@ public class PlayerAttack : MonoBehaviour
     private PlayerStats stats;
     private PlayerHandControl handControl;
     public WeaponStats weaponStats;
+    private bool isAttacking = false;
     private void Awake()
     {
         animator = GetComponent<Animator>();    
@@ -19,10 +20,12 @@ public class PlayerAttack : MonoBehaviour
     }
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Mouse0))
+        if (Input.GetKeyDown(KeyCode.Mouse0) && !isAttacking)
         {
+            isAttacking = true;
             animator.SetLayerWeight(1, 1);
             animator.SetBool("IsAttacking", true);
+            handControl.canFollow = false;
         }
     }
 
@@ -30,7 +33,6 @@ public class PlayerAttack : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Obstacle"))
         {
-            handControl.SetCanFollow();
             EndAttack();
         }
     }
@@ -39,5 +41,7 @@ public class PlayerAttack : MonoBehaviour
     {
         animator.SetBool("IsAttacking", false);
         animator.SetLayerWeight(1, 0);
+        handControl.canFollow = true;
+        isAttacking = false;
     }
 }

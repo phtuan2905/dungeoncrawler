@@ -35,7 +35,7 @@ public class PlayerHandControl : MonoBehaviour
         HandFollowCursor();
     }
 
-    bool canFollow = true;
+    public bool canFollow = true;
 
     void HandFollowCursor()
     {

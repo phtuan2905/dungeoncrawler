@@ -11,6 +11,7 @@ public class ObjectMoveTowardPlayer : MonoBehaviour
     private Vector2 currentPoint;
 
     bool canMove = true;
+    bool isPlayer = false;
 
     [Header("Object Attributes")]
     private float speed;
@@ -31,10 +32,16 @@ public class ObjectMoveTowardPlayer : MonoBehaviour
 
     void MoveToPoint()
     {
-        if (viewRange.canSee && canMove)
+        if (canMove && viewRange.canSee)
         {
-
-            direction = viewRange.player.transform.position - transform.position;
+            if (!isPlayer)
+            {
+                direction = viewRange.player.transform.position - transform.position;
+            }
+            else
+            {
+                direction = Vector2.zero;
+            }
         }
         else
         {
@@ -52,17 +59,25 @@ public class ObjectMoveTowardPlayer : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.name == "Player" || collision.gameObject.CompareTag("Obstacle"))
+        if (collision.gameObject.CompareTag("Obstacle"))
         {
             canMove = false;
+        }
+        if (collision.gameObject.name == "Player")
+        {
+            isPlayer = true;
         }
     }
 
     private void OnCollisionExit2D(Collision2D collision)
     {
-        if (collision.gameObject.name == "Player" || collision.gameObject.CompareTag("Obstacle"))
+        if (collision.gameObject.CompareTag("Obstacle"))
         {
             canMove = true;
+        }
+        if (collision.gameObject.name == "Player")
+        {
+            isPlayer = false;
         }
     }
 }
