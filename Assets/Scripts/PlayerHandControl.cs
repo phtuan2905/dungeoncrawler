@@ -8,25 +8,26 @@ public class PlayerHandControl : MonoBehaviour
     private GameObject playerHand;
     private GameObject playerHandFlip;
 
-    private SpriteRenderer playerHead;
-    private SpriteRenderer playerBody;
-    private SpriteRenderer playerLeg1;
-    private SpriteRenderer playerLeg2;
+    private Transform playerHead;
+    private Transform playerBody;
+    private Transform playerLeg1;
+    private Transform playerLeg2;
 
     [Header("Player Hand Index")]
     [SerializeField] private Vector3 mousePosition;
     [SerializeField] private Vector3 direction;
     [SerializeField] private Vector3 handFlip;
+    [SerializeField] private Vector3 bodyFlip;
     [SerializeField] private float angle;
     void Start()
     {
         stats = GetComponent<PlayerStats>();
         playerHand = transform.Find("Player Hand").gameObject;
         playerHandFlip = transform.Find("Player Hand/Player Hand Flip").gameObject;
-        playerHead = transform.Find("Player Head").GetComponent<SpriteRenderer>();
-        playerBody = transform.Find("Player Body").GetComponent<SpriteRenderer>();
-        playerLeg1 = transform.Find("Player Leg 1").GetComponent<SpriteRenderer>();
-        playerLeg2 = transform.Find("Player Leg 2").GetComponent<SpriteRenderer>();
+        playerHead = transform.Find("Player Head");
+        playerBody = transform.Find("Player Body");
+        playerLeg1 = transform.Find("Player Leg 1");
+        playerLeg2 = transform.Find("Player Leg 2");
     }
 
     // Update is called once per frame
@@ -48,20 +49,18 @@ public class PlayerHandControl : MonoBehaviour
         if (angle <= 90 && angle >= -90)
         {
             handFlip = new Vector3(1, 1, 1);
-            playerHead.flipX = false;
-            playerBody.flipX = false;
-            playerLeg1.flipX = false;
-            playerLeg2.flipX = true;
+            bodyFlip = new Vector3(1, 1, 1);
         }
         else
         {
             handFlip = new Vector3(1, -1, 1);
-            playerHead.flipX = true;
-            playerBody.flipX = true;
-            playerLeg1.flipX = true;
-            playerLeg2.flipX = false;
+            bodyFlip = new Vector3(-1, 1, 1);
         }
         playerHandFlip.transform.localScale = handFlip;
+        playerHead.localScale = bodyFlip;
+        playerBody.localScale = bodyFlip;
+        playerLeg1.localScale = bodyFlip;
+        playerLeg2.localScale = bodyFlip;
     }
 
     public void SetCanFollow()

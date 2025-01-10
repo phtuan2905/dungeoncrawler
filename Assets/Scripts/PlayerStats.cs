@@ -24,6 +24,10 @@ public class PlayerStats : MonoBehaviour
     public int exp;
     public int maxExp;
 
+    [Header("Player Equipments Attributes")]
+    public int minArmor;
+    public int maxArmor;
+
     [Header("GUI")]
     [SerializeField] private Image healthBar;
     [SerializeField] private TextMeshProUGUI healthText;
@@ -31,11 +35,13 @@ public class PlayerStats : MonoBehaviour
     [SerializeField] private TextMeshProUGUI staminaText;
     [SerializeField] private Image expBar;
     [SerializeField] private TextMeshProUGUI expText;
+    [SerializeField] private TextMeshProUGUI levelText;
     //public int attackSpeed;
 
     private void Awake()
     {
-        SetStats();
+        PlayerPrefs.DeleteAll();
+        SetAttributes();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -43,7 +49,7 @@ public class PlayerStats : MonoBehaviour
         if (collision.gameObject.CompareTag("Enemy") && collision.name == "Enemy Weapon")
         {
             SetDamage(collision.GetComponent<ObjectStats>().damage);
-        }
+        } 
     }
 
     void SetDamage(int damage)
@@ -57,16 +63,30 @@ public class PlayerStats : MonoBehaviour
             health = 0;
             Debug.Log("You Die");
         }
-        SetStats();
+        SetAttributes();
     }
     
-    void SetStats()
+    public void SetAttributes()
     {
-        healthText.text = health.ToString() + "/" + maxHealth;
-        healthBar.fillAmount = health / maxHealth;
-        staminaText.text = stamina.ToString() + "/" + maxStamina;
-        staminaBar.fillAmount = stamina / maxStamina;
-        expText.text = exp.ToString() + "/" + maxExp;
-        expBar.fillAmount = exp / maxExp;
+        levelText.text = "Lvl: " + PlayerPrefs.GetInt("Level");
+        healthText.text = health + "/" + maxHealth;
+        healthBar.fillAmount = (float)health / (float)maxHealth;
+        staminaText.text = stamina + "/" + maxStamina;
+        staminaBar.fillAmount = (float)stamina / (float)maxStamina;
+        expText.text = exp + "/" + maxExp;
+        expBar.fillAmount = (float)exp / (float)maxExp;
+    }
+
+    public void CollectExpOrb(GameObject orb)
+    {
+        exp++;
+        if (exp > maxExp)
+        {
+            exp = 0;
+            PlayerPrefs.SetInt("Level", PlayerPrefs.GetInt("Level") + 1);
+            PlayerPrefs.SetInt("LevelUpPoint", PlayerPrefs.GetInt("LevelUpPoint") + 1);
+        }
+        Destroy(orb);
+        SetAttributes();
     }
 }
