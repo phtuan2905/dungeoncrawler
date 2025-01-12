@@ -9,4 +9,9 @@ public class WeaponStats : MonoBehaviour
 
     [Header("Weapon Attributes")]
     public float speed;
+    public float hitBoxWidth;
+    public float hitBoxHeight;
+    public float hitBoxX;
+    public float hitBoxY;
+    public int attackType;
 }

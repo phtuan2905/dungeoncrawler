@@ -8,6 +8,8 @@ public class PlayerAttack : MonoBehaviour
     private Animator animator;
     private PlayerStats stats;
     private PlayerHandControl handControl;
+    private int attackType;
+    public BoxCollider2D playerWeapon;
     public WeaponStats weaponStats;
     private bool isAttacking = false;
     private void Awake()
@@ -16,14 +18,14 @@ public class PlayerAttack : MonoBehaviour
         stats = GetComponent<PlayerStats>();
         handControl = GetComponent<PlayerHandControl>();
         //weaponStats = transform.Find("Player Hand/Player Hand Flip/Player Hand Position/Player Hand Sprite/Player Weapon").GetComponent<WeaponStats>();
-        animator.SetFloat("AttackSpeedMultiplier", weaponStats.speed);
+        SetWeapon(null);
     }
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Mouse0) && !isAttacking)
         {
             isAttacking = true;
-            animator.SetLayerWeight(1, 1);
+            animator.SetLayerWeight(attackType, 1);
             animator.SetBool("IsAttacking", true);
             handControl.canFollow = false;
         }
@@ -39,9 +41,34 @@ public class PlayerAttack : MonoBehaviour
 
     void EndAttack()
     {
-        animator.SetBool("IsAttacking", false);
-        animator.SetLayerWeight(1, 0);
         handControl.canFollow = true;
+        animator.SetBool("IsAttacking", false);
         isAttacking = false;
+        for (int i = 1; i < animator.layerCount; i++) animator.SetLayerWeight(i, 0);
     }
+
+    public void SetWeapon(GameObject item)
+    {
+        if (item != null)
+        {
+            WeaponStats itemStats = item.GetComponent<WeaponStats>();
+            attackType = itemStats.attackType;
+            animator.SetFloat("AttackSpeedMultiplier", itemStats.speed * stats.attackSpeed);
+            playerWeapon.size = new Vector2(itemStats.hitBoxWidth, itemStats.hitBoxHeight);
+            playerWeapon.offset = new Vector2(itemStats.hitBoxX, itemStats.hitBoxY);
+        }
+        else
+        {
+            attackType = 1;
+            animator.SetFloat("AttackSpeedMultiplier", stats.attackSpeed);
+            playerWeapon.size = new Vector2(0.32f, 0.32f);
+            playerWeapon.offset = Vector2.zero;
+        }
+    }
+
+    /*
+     * hand attack = 1
+     * sword attack = 2
+     * spear attack = 3
+     */
 }

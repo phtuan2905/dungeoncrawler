@@ -61,8 +61,8 @@ public class LevelUpSystem : MonoBehaviour
         endPoint = PlayerPrefs.GetInt("END");
         aglPoint = PlayerPrefs.GetInt("AGL");
 
-        healthTemp = playerStats.health;
-        staminaTemp = playerStats.stamina;
+        healthTemp = playerStats.maxHealth;
+        staminaTemp = playerStats.maxStamina;
         moveSpeedTemp = playerStats.moveSpeed;
         SetStats();
     }
@@ -98,7 +98,7 @@ public class LevelUpSystem : MonoBehaviour
         playerStats.maxHealth = healthTemp;
         playerStats.maxStamina = staminaTemp;
         playerStats.moveSpeed = moveSpeedTemp;
-        playerStats.SetAttributes();
+        playerStats.SetUIAttributes();
     }
     public void LevelUpPoint(bool state, int pointIndex)
     {
@@ -238,4 +238,8 @@ public class LevelUpSystem : MonoBehaviour
         SetStats();
     }
 
+    public bool CompareStats(int STR, int DEX, int INT, int VGR, int END, int AGL)
+    {
+        return (STR <= strPoint && DEX <= dexPoint && INT <= intPoint && VGR <= vgrPoint && END <= endPoint && AGL <= aglPoint);
+    }
 }

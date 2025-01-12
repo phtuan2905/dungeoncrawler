@@ -13,14 +13,21 @@ public class ObjectStats : MonoBehaviour
 
     private void Start()
     {
-        
+
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.name == "Player Weapon" && collision.transform.CompareTag("Player"))
         {
-            GetDamage(collision.transform.GetChild(0).GetComponent<WeaponStats>().damage);
+            if (collision.transform.childCount > 0)
+            {
+                GetDamage(collision.transform.GetChild(0).GetComponent<WeaponStats>().damage);
+            }
+            else
+            {
+                GetDamage(2);
+            }
         }
     }
 

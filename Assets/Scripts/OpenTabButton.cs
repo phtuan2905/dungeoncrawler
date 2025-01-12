@@ -13,6 +13,7 @@ public class OpenTabButton : MonoBehaviour
         playerAttack = GameObject.Find("Player").GetComponent<PlayerAttack>();
         playerHandControl = GameObject.Find("Player").GetComponent<PlayerHandControl>();
     }
+
     public void OnClick()
     {
         if (!tab.activeSelf)
