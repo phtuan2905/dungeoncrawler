@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using static UnityEditor.Progress;
@@ -210,28 +211,6 @@ public class InventoryManage : MonoBehaviour
         SetSelectQuickSlots(true);
     }
 
-    public void DropItem(GameObject item, Type slotType, EquipmentType slotEqpType)
-    {
-        if (slotType == Type.Equipment)
-        {
-            SetEquipment(null, slotType, slotEqpType);
-            if (slotEqpType == EquipmentType.Weapon)
-            {
-                playerAttack.SetWeapon(null);
-            }
-        }
-        if (item.GetComponent<ItemStats>().type == Type.Useable)
-        {
-            item.GetComponent<UseableItem>().enabled = false;
-        }
-        item.GetComponent<SpriteRenderer>().enabled = true;
-        item.transform.SetParent(null);
-        item.transform.position = transform.position + new Vector3(0, item.GetComponent<BoxCollider2D>().size.y + 0.1f + (GetComponent<BoxCollider2D>().size.y / 2f), 0);
-        item.GetComponent<BoxCollider2D>().enabled = true;
-        item.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
-        item.SetActive(true);
-    }
-
     private void Update()
     {
         SelectQuickSlots();
@@ -306,6 +285,103 @@ public class InventoryManage : MonoBehaviour
 
     public void UseUseableItem()
     {
+        SetUseable();
+    }
 
+    [Header("Drop Item")]
+    [SerializeField] private int dropNumber;
+    [SerializeField] private GameObject dropPanel;
+    private Type dropSlotType;
+    private EquipmentType dropSlotEqpType;
+    private GameObject dropItem;
+    [SerializeField] private TextMeshProUGUI dropNumberUI;
+    [SerializeField] private TextMeshProUGUI maxDropNumberUI;
+
+    public void StartDropItem(GameObject item, Type slotType, EquipmentType slotEqpType)
+    {
+        ItemStats itemStats = item.GetComponent<ItemStats>();
+        dropNumber = itemStats.stack;
+        if (dropNumber == 1)
+        {
+            if (slotType == Type.Equipment)
+            {
+                SetEquipment(null, slotType, slotEqpType);
+                if (slotEqpType == EquipmentType.Weapon)
+                {
+                    playerAttack.SetWeapon(null);
+                }
+            }
+            if (item.GetComponent<ItemStats>().type == Type.Useable)
+            {
+                item.GetComponent<UseableItem>().enabled = false;
+            }
+            item.GetComponent<SpriteRenderer>().enabled = true;
+            item.transform.SetParent(null);
+            item.transform.position = transform.position + new Vector3(0, item.GetComponent<BoxCollider2D>().size.y + 0.1f + (GetComponent<BoxCollider2D>().size.y / 2f), 0);
+            item.GetComponent<BoxCollider2D>().enabled = true;
+            item.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
+            Destroy(item.GetComponent<ItemStats>().itemUI.gameObject);
+            item.SetActive(true);
+            dropPanel.SetActive(false);
+            return;
+        }
+        dropNumberUI.text = dropNumber.ToString();
+        maxDropNumberUI.text = dropNumber.ToString();
+        dropPanel.SetActive(true);
+        dropItem = item;
+        dropSlotType = slotType;
+        dropSlotEqpType = slotEqpType;
+    }
+
+    public void ConfirmDrop()
+    {
+        GameObject dropItemClone = Instantiate(dropItem);
+        dropItemClone.name = dropItem.name;
+        if (dropSlotType == Type.Equipment)
+        {
+            SetEquipment(null, dropSlotType, dropSlotEqpType);
+            if (dropSlotEqpType == EquipmentType.Weapon)
+            {
+                playerAttack.SetWeapon(null);
+            }
+        }
+        if (dropItemClone.GetComponent<ItemStats>().type == Type.Useable)
+        {
+            dropItemClone.GetComponent<UseableItem>().enabled = false;
+        }
+        dropItemClone.GetComponent<SpriteRenderer>().enabled = true;
+        dropItemClone.transform.SetParent(null);
+        dropItemClone.transform.position = transform.position + new Vector3(0, dropItemClone.GetComponent<BoxCollider2D>().size.y + 0.1f + (GetComponent<BoxCollider2D>().size.y / 2f), 0);
+        dropItemClone.GetComponent<BoxCollider2D>().enabled = true;
+        dropItemClone.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
+        dropItemClone.GetComponent<ItemStats>().stack = dropNumber;
+        dropItemClone.SetActive(true);
+        SetActiveDropPanel();
+
+        dropItem.GetComponent<ItemStats>().stack -= dropNumber;
+        dropItem.GetComponent <ItemStats>().itemUI.SetCapacity(dropItem.GetComponent<ItemStats>().stack);
+        if (dropItem.GetComponent<ItemStats>().stack == 0)
+        {
+            Destroy(dropItem.GetComponent<ItemStats>().itemUI.gameObject);
+            Destroy(dropItem);
+        }
+    }
+
+    public void SetActiveDropPanel()
+    {
+        dropPanel.SetActive(false);
+    }
+
+    public void ChangeDropNumber(bool state)
+    {
+        if (state && dropNumber < dropItem.GetComponent<ItemStats>().stack)
+        {
+            dropNumber++;
+        }
+        else if (!state && dropNumber > 1)
+        {
+            dropNumber--;
+        }
+        dropNumberUI.text = dropNumber.ToString();
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.RuleTile.TilingRuleOutput;
 
 public class ItemStats : MonoBehaviour
 {
@@ -27,4 +28,16 @@ public class ItemStats : MonoBehaviour
     [Header("Stack")]
     public int stack = 1;
     public int maxStack = 1;
+
+    public void UseUseableItem()
+    {
+        stack--;
+        itemUI.SetCapacity(stack);
+        if (stack == 0)
+        {
+            Destroy(itemUI.gameObject);
+            transform.parent.GetComponent<InventoryManage>().UseUseableItem();
+            Destroy(gameObject);
+        }
+    }
 }

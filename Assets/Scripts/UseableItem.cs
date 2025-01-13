@@ -12,7 +12,9 @@ public class UseableItem : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Mouse1))
         {
             GameObject effectClone = Instantiate(effect);
+            GetComponent<ItemStats>().UseUseableItem();
             effectClone.transform.SetParent(transform.parent.parent);
+            effectClone.transform.localPosition = Vector3.zero;
             //Debug.Log("Effect from " + gameObject.name);
         }
     }

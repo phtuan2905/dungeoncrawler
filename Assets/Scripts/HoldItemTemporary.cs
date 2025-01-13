@@ -118,7 +118,7 @@ public class HoldItemTemporary : MonoBehaviour
     {
         Type slotType = slotBefore.GetComponent<InventorySlot>().type;
         EquipmentType slotEqpType = slotBefore.GetComponent<InventorySlot>().equipmentType;
-        inventory.DropItem(item, slotType, slotEqpType);
+        inventory.StartDropItem(item, slotType, slotEqpType);
     }
 
     bool CompareType(GameObject item, Type itemType, Type slotType, EquipmentType itemEqpType, EquipmentType slotEqpType)

@@ -64,3 +64,6 @@ TagManager:
   - name: Armor
     uniqueID: 3337808169
     locked: 0
+  - name: Effect
+    uniqueID: 3347702937
+    locked: 0

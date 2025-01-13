@@ -36,8 +36,9 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         if (holdItemTemp.GetComponent<HoldItemTemporary>().slotAfter == null)
         {
+            transform.position = holdItemTemp.GetComponent<HoldItemTemporary>().slotBefore.transform.position;
+            transform.SetParent(holdItemTemp.GetComponent<HoldItemTemporary>().slotBefore.transform);
             holdItemTemp.GetComponent<HoldItemTemporary>().DropUIItem(item);
-            Destroy(gameObject);
         }
         GetComponent<Image>().raycastTarget = true;
     }
