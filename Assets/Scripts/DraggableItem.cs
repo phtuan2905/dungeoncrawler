@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -7,6 +8,7 @@ using UnityEngine.UI;
 public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler
 {
     private GameObject holdItemTemp;
+    public TextMeshProUGUI capacityText;
 
     public Type type;
     public EquipmentType equipmentType;
@@ -52,5 +54,10 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         type = itemType;
         equipmentType = itemEqpType;
         GetComponent<Image>().sprite = item.GetComponent<SpriteRenderer>().sprite;
+    }
+
+    public void SetCapacity(int capacity)
+    {
+        capacityText.text = capacity.ToString();
     }
 }

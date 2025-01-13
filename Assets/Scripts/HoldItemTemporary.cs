@@ -1,4 +1,5 @@
 using UnityEngine;
+using static UnityEditor.Progress;
 
 public class HoldItemTemporary : MonoBehaviour
 {
@@ -21,6 +22,31 @@ public class HoldItemTemporary : MonoBehaviour
             EquipmentType itemeqp2 = slotAfter.transform.GetChild(0).GetComponent<DraggableItem>().equipmentType;
             Type slot1 = slotBefore.GetComponent<InventorySlot>().type;
             EquipmentType sloteqp1 = slotBefore.GetComponent<InventorySlot>().equipmentType;
+
+            GameObject item1Stats = transform.GetChild(0).GetComponent<DraggableItem>().item;
+            GameObject item2Stats = slotAfter.transform.GetChild(0).GetComponent<DraggableItem>().item;
+
+            if (item1Stats.name == item2Stats.name)
+            {
+                if (item1Stats.GetComponent<ItemStats>().stack + item2Stats.GetComponent<ItemStats>().stack <= item2Stats.GetComponent<ItemStats>().maxStack)
+                {
+                    item2Stats.GetComponent<ItemStats>().stack += item1Stats.GetComponent<ItemStats>().stack;
+                    item2Stats.GetComponent<ItemStats>().itemUI.SetCapacity(item2Stats.GetComponent<ItemStats>().stack);
+                    Destroy(item1Stats.gameObject);
+                    Destroy(item1Stats.GetComponent<ItemStats>().itemUI);
+                    return;
+                }
+                else
+                {
+                    item1Stats.GetComponent<ItemStats>().stack -= (item2Stats.GetComponent<ItemStats>().maxStack - item2Stats.GetComponent<ItemStats>().stack);
+                    item1Stats.GetComponent <ItemStats>().itemUI.SetCapacity(item1Stats.GetComponent<ItemStats>().stack);
+                    item2Stats.GetComponent<ItemStats>().stack = item2Stats.GetComponent<ItemStats>().maxStack;
+                    item2Stats.GetComponent<ItemStats>().itemUI.SetCapacity(item2Stats.GetComponent<ItemStats>().stack);
+                    transform.GetChild(0).position = slotBefore.transform.position;
+                    transform.GetChild(0).SetParent(slotBefore.transform);
+                    return;
+                }
+            }
 
             if (CompareType(transform.GetChild(0).gameObject, item1, slot2, itemeqp1, sloteqp2) && CompareType(slotAfter.transform.GetChild(0).gameObject, item2, slot1, itemeqp2, sloteqp1))
             {

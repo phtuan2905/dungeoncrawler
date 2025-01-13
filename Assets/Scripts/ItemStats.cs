@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class ItemStats : MonoBehaviour
 {
+    public DraggableItem itemUI;
+
     [Header("Stats")]
     public int health;
     public int stamina;

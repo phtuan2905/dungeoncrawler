@@ -28,6 +28,7 @@ public class InventoryManage : MonoBehaviour
     public int currentQuickSlot;
 
     [Header("Inventory")]
+    [SerializeField] private int maxSlotsCapacity;
     public List<GameObject> items;
 
     private void Awake()
@@ -44,7 +45,9 @@ public class InventoryManage : MonoBehaviour
             {
                 GameObject itemUIClone = Instantiate(itemUIPrefab, slot);
                 itemUIClone.GetComponent<DraggableItem>().SetItem(item, item.GetComponent<ItemStats>().type, item.GetComponent<ItemStats>().equipmentType);
-                break;
+                item.GetComponent<ItemStats>().itemUI = itemUIClone.GetComponent<DraggableItem>();
+                itemUIClone.GetComponent<DraggableItem>().SetCapacity(item.GetComponent<ItemStats>().stack);
+                return;
             }   
         }
     }
@@ -53,15 +56,37 @@ public class InventoryManage : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Item"))
         {
-            collision.GetComponent<BoxCollider2D>().enabled = false;
-            collision.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
-            if (collision.GetComponent<ItemStats>().type == Type.Useable)
+            foreach (Transform item in transform)
             {
-                collision.GetComponent<SpriteRenderer>().enabled = false;
+                if (item.name == collision.name)
+                {
+                    if (collision.GetComponent<ItemStats>().stack + item.GetComponent<ItemStats>().stack <= item.GetComponent<ItemStats>().maxStack)
+                    {
+                        item.GetComponent<ItemStats>().stack += collision.GetComponent<ItemStats>().stack;
+                        item.GetComponent<ItemStats>().itemUI.SetCapacity(item.GetComponent<ItemStats>().stack);
+                        Destroy(collision.gameObject);
+                        return;
+                    }
+                    else
+                    {
+                        collision.GetComponent<ItemStats>().stack -= (item.GetComponent<ItemStats>().maxStack - item.GetComponent<ItemStats>().stack);
+                        item.GetComponent<ItemStats>().stack = item.GetComponent<ItemStats>().maxStack;
+                        item.GetComponent<ItemStats>().itemUI.SetCapacity(item.GetComponent<ItemStats>().stack);
+                    }
+                }
             }
-            collision.gameObject.transform.SetParent(transform);
-            collision.gameObject.SetActive(false);
-            AddItemUI(collision.gameObject);
+            if (CheckEmptySlot())
+            {
+                collision.GetComponent<BoxCollider2D>().enabled = false;
+                collision.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
+                if (collision.GetComponent<ItemStats>().type == Type.Useable)
+                {
+                    collision.GetComponent<SpriteRenderer>().enabled = false;
+                }
+                collision.gameObject.transform.SetParent(transform);
+                collision.gameObject.SetActive(false);
+                AddItemUI(collision.gameObject);
+            } 
         }
     }
 
@@ -169,8 +194,13 @@ public class InventoryManage : MonoBehaviour
         {
             if (quickSlotUI.transform.GetChild(i).childCount > 0)
             {
-                if (quickSlots[i] != null) quickSlots[i].SetActive(false);
+                if (quickSlots[i] != null)
+                {
+                    quickSlots[i].SetActive(false);
+                }
                 quickSlots[i] = quickSlotUI.transform.GetChild(i).GetChild(0).GetComponent<DraggableItem>().item;
+                
+                //quickSlots[i].GetComponent<UseableItem>().enabled = false;
             }
             else
             {
@@ -189,6 +219,10 @@ public class InventoryManage : MonoBehaviour
             {
                 playerAttack.SetWeapon(null);
             }
+        }
+        if (item.GetComponent<ItemStats>().type == Type.Useable)
+        {
+            item.GetComponent<UseableItem>().enabled = false;
         }
         item.GetComponent<SpriteRenderer>().enabled = true;
         item.transform.SetParent(null);
@@ -248,7 +282,7 @@ public class InventoryManage : MonoBehaviour
     {
         if (quickSlots[currentQuickSlot] != null)
         {
-            //quickSlots[currentQuickSlot].GetComponent<UseableItem>().enabled = option;
+            quickSlots[currentQuickSlot].GetComponent<UseableItem>().enabled = option;
             quickSlots[currentQuickSlot].SetActive(option);
         }
     }
@@ -256,5 +290,22 @@ public class InventoryManage : MonoBehaviour
     void SetUISelectQuickSlots()
     {
         quickSlotSelectUI.transform.position = quickSlotUI.transform.GetChild(currentQuickSlot).position;
+    }
+
+    bool CheckEmptySlot()
+    {
+        foreach (Transform itemUI in inventoryUI.transform)
+        {
+            if (itemUI.childCount == 0 && itemUI.CompareTag("Inventory Slot"))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void UseUseableItem()
+    {
+
     }
 }

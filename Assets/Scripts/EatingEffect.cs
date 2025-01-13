@@ -7,7 +7,7 @@ public class EatingEffect : MonoBehaviour
     [SerializeField] private int staminaGain;
     void Start()
     {
-        if (transform.parent.CompareTag("Player"))
+        if (transform.parent != null && transform.parent.CompareTag("Player"))
         {
             transform.parent.GetComponent<PlayerStats>().SetStamina(staminaGain);
             Destroy(gameObject);
