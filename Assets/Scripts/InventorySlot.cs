@@ -28,6 +28,7 @@ public class InventorySlot : MonoBehaviour, IDropHandler
 
     public Type type;
     public EquipmentType equipmentType;
+    public GameObject inventoryOrigin;
     private void Awake()
     {
         holdItemTemp = GameObject.Find("UI/Safe Area/Hold Item Temporary");

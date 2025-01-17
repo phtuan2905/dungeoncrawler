@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEditor.Progress;
 
@@ -55,6 +56,14 @@ public class HoldItemTemporary : MonoBehaviour
                 transform.GetChild(0).position = slotAfter.transform.position;
                 transform.GetChild(0).SetParent(slotAfter.transform);
 
+                if (slotBefore.GetComponent<InventorySlot>().inventoryOrigin != slotAfter.GetComponent<InventorySlot>().inventoryOrigin)
+                {
+                    item1Stats.transform.position = slotAfter.GetComponent<InventorySlot>().inventoryOrigin.transform.position;
+                    item1Stats.transform.SetParent(slotAfter.GetComponent<InventorySlot>().inventoryOrigin.transform);
+                    item2Stats.transform.position = slotBefore.GetComponent<InventorySlot>().inventoryOrigin.transform.position;
+                    item2Stats.transform.SetParent(slotBefore.GetComponent<InventorySlot>().inventoryOrigin.transform);
+                }
+
                 if (slot1 == Type.Useable)
                 {
                     inventory.SetUseable();
@@ -83,10 +92,17 @@ public class HoldItemTemporary : MonoBehaviour
         }
         else
         {
+            GameObject item1Stats = transform.GetChild(0).GetComponent<DraggableItem>().item;
             if (CompareType(transform.GetChild(0).gameObject, item1, slot2, itemeqp1, sloteqp2))
             {
                 transform.GetChild(0).position = slotAfter.transform.position;
                 transform.GetChild(0).SetParent(slotAfter.transform);
+
+                if (slotBefore.GetComponent<InventorySlot>().inventoryOrigin != slotAfter.GetComponent<InventorySlot>().inventoryOrigin)
+                {
+                    item1Stats.transform.position = slotAfter.GetComponent<InventorySlot>().inventoryOrigin.transform.position;
+                    item1Stats.transform.SetParent(slotAfter.GetComponent<InventorySlot>().inventoryOrigin.transform);
+                }
 
                 if (slotBefore.GetComponent<InventorySlot>().type == Type.Useable)
                 {

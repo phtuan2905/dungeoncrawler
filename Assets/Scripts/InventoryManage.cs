@@ -53,24 +53,24 @@ public class InventoryManage : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
+    public void AddItem(GameObject itemAdd)
     {
-        if (collision.gameObject.CompareTag("Item"))
+        if (itemAdd.gameObject.CompareTag("Item"))
         {
             foreach (Transform item in transform)
             {
-                if (item.name == collision.name)
+                if (item.name == itemAdd.name)
                 {
-                    if (collision.GetComponent<ItemStats>().stack + item.GetComponent<ItemStats>().stack <= item.GetComponent<ItemStats>().maxStack)
+                    if (itemAdd.GetComponent<ItemStats>().stack + item.GetComponent<ItemStats>().stack <= item.GetComponent<ItemStats>().maxStack)
                     {
-                        item.GetComponent<ItemStats>().stack += collision.GetComponent<ItemStats>().stack;
+                        item.GetComponent<ItemStats>().stack += itemAdd.GetComponent<ItemStats>().stack;
                         item.GetComponent<ItemStats>().itemUI.SetCapacity(item.GetComponent<ItemStats>().stack);
-                        Destroy(collision.gameObject);
+                        Destroy(itemAdd.gameObject);
                         return;
                     }
                     else
                     {
-                        collision.GetComponent<ItemStats>().stack -= (item.GetComponent<ItemStats>().maxStack - item.GetComponent<ItemStats>().stack);
+                        itemAdd.GetComponent<ItemStats>().stack -= (item.GetComponent<ItemStats>().maxStack - item.GetComponent<ItemStats>().stack);
                         item.GetComponent<ItemStats>().stack = item.GetComponent<ItemStats>().maxStack;
                         item.GetComponent<ItemStats>().itemUI.SetCapacity(item.GetComponent<ItemStats>().stack);
                     }
@@ -78,17 +78,22 @@ public class InventoryManage : MonoBehaviour
             }
             if (CheckEmptySlot())
             {
-                collision.GetComponent<BoxCollider2D>().enabled = false;
-                collision.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
-                if (collision.GetComponent<ItemStats>().type == Type.Useable)
+                itemAdd.GetComponent<BoxCollider2D>().enabled = false;
+                itemAdd.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
+                if (itemAdd.GetComponent<ItemStats>().type == Type.Useable)
                 {
-                    collision.GetComponent<SpriteRenderer>().enabled = false;
+                    itemAdd.GetComponent<SpriteRenderer>().enabled = false;
                 }
-                collision.gameObject.transform.SetParent(transform);
-                collision.gameObject.SetActive(false);
-                AddItemUI(collision.gameObject);
-            } 
+                itemAdd.gameObject.transform.SetParent(transform);
+                itemAdd.gameObject.SetActive(false);
+                AddItemUI(itemAdd.gameObject);
+            }
         }
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        AddItem(collision.gameObject);
     }
 
     public void SetEquipment(GameObject item, Type itemType, EquipmentType itemEqpType)
