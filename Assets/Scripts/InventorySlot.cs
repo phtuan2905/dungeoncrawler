@@ -37,6 +37,6 @@ public class InventorySlot : MonoBehaviour, IDropHandler
     public void OnDrop(PointerEventData eventData)
     {
         holdItemTemp.GetComponent<HoldItemTemporary>().slotAfter = gameObject;
-        holdItemTemp.GetComponent<HoldItemTemporary>().ChangeSlot();
+        //holdItemTemp.GetComponent<HoldItemTemporary>().ChangeSlot();
     }
 }

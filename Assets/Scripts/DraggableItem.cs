@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IDropHandler
 {
-    private GameObject holdItemTemp;
+    private HoldItemTemporary holdItemTemp;
     public TextMeshProUGUI capacityText;
 
     public Type type;
@@ -16,13 +16,13 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     [SerializeField] public GameObject item;
     private void Awake()
     {
-        holdItemTemp = GameObject.Find("UI/Safe Area/Hold Item Temporary");
+        holdItemTemp = GameObject.Find("UI/Safe Area/Hold Item Temporary").GetComponent<HoldItemTemporary>();
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        holdItemTemp.GetComponent<HoldItemTemporary>().slotBefore = transform.parent.gameObject;
-        holdItemTemp.GetComponent<HoldItemTemporary>().slotAfter = null;
+        holdItemTemp.slotBefore = transform.parent.gameObject;
+        holdItemTemp.slotAfter = null;
         GetComponent<Image>().raycastTarget = false;
     }
 
@@ -34,31 +34,31 @@ public class DraggableItem : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        if (holdItemTemp.GetComponent<HoldItemTemporary>().slotAfter == null)
-        {
-            transform.position = holdItemTemp.GetComponent<HoldItemTemporary>().slotBefore.transform.position;
-            transform.SetParent(holdItemTemp.GetComponent<HoldItemTemporary>().slotBefore.transform);
-            holdItemTemp.GetComponent<HoldItemTemporary>().DropUIItem(item);
-        }
+        //if (holdItemTemp.GetComponent<HoldItemTemporary>().slotAfter == null)
+        //{
+        //    transform.position = holdItemTemp.GetComponent<HoldItemTemporary>().slotBefore.transform.position;
+        //    transform.SetParent(holdItemTemp.GetComponent<HoldItemTemporary>().slotBefore.transform);
+        //    holdItemTemp.GetComponent<HoldItemTemporary>().DropUIItem(item);
+        //}
+        holdItemTemp.ChangeItemUISlot();
         GetComponent<Image>().raycastTarget = true;
     }
 
     public void OnDrop(PointerEventData eventData)
     {
         holdItemTemp.GetComponent<HoldItemTemporary>().slotAfter = transform.parent.gameObject;
-        holdItemTemp.GetComponent<HoldItemTemporary>().ChangeSlot();
     }
     
-    public void SetItem(GameObject addItem, Type itemType, EquipmentType itemEqpType)
+    public void SetItem(GameObject addItem)
     {
         item = addItem;
-        type = itemType;
-        equipmentType = itemEqpType;
+        type = addItem.GetComponent<ItemStats>().type;
+        equipmentType = addItem.GetComponent<ItemStats>().equipmentType;
         GetComponent<Image>().sprite = item.GetComponent<SpriteRenderer>().sprite;
     }
 
-    public void SetCapacity(int capacity)
+    public void SetCapacity()
     {
-        capacityText.text = capacity.ToString();
+        capacityText.text = item.GetComponent<ItemStats>().stack.ToString();
     }
 }

@@ -8,6 +8,6 @@ public class ChangeDropNumberButton : MonoBehaviour
     public InventoryManage inventoryManager;
     public void OnClick()
     {
-        inventoryManager.ChangeDropNumber(state);
+        //inventoryManager.ChangeDropNumber(state);
     }
 }

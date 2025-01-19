@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class LevelUpSystem : MonoBehaviour
 {
-    private PlayerStats playerStats;
+    public PlayerStats playerStats;
 
     [Header("Stats")]
     [SerializeField] private int point;
@@ -39,7 +39,7 @@ public class LevelUpSystem : MonoBehaviour
 
     private void Awake()
     {
-        playerStats = GameObject.Find("Player").GetComponent<PlayerStats>();
+        //playerStats = GameObject.Find("Player").GetComponent<PlayerStats>();
         //PlayerPrefs.SetInt("Level", 1);
         //PlayerPrefs.SetInt("LevelUpPoint", 0);
         //PlayerPrefs.SetInt("STR", 0);
@@ -68,7 +68,7 @@ public class LevelUpSystem : MonoBehaviour
     }
 
 
-    void SetStats()
+    public void SetStats()
     {
         levelUpText.text = point.ToString();
         strText.text = strPoint.ToString();

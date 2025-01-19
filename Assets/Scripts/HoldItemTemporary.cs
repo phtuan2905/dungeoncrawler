@@ -10,131 +10,103 @@ public class HoldItemTemporary : MonoBehaviour
     public InventoryManage inventory;
     public LevelUpSystem levelUpSystem;
 
-    public void ChangeSlot()
+    public void ChangeItemUISlot()
     {
-        Type item1 = transform.GetChild(0).GetComponent<DraggableItem>().type;
-        EquipmentType itemeqp1 = transform.GetChild(0).GetComponent<DraggableItem>().equipmentType;
-        Type slot2 = slotAfter.GetComponent<InventorySlot>().type;
-        EquipmentType sloteqp2 = slotAfter.GetComponent<InventorySlot>().equipmentType;
-
-        if (slotAfter.transform.childCount > 0)
+        GameObject item1 = transform.GetChild(0).GetComponent<DraggableItem>().item;
+        GameObject item1UI = transform.GetChild(0).gameObject;
+        if (slotAfter == null)
         {
-            Type item2 = slotAfter.transform.GetChild(0).GetComponent<DraggableItem>().type;
-            EquipmentType itemeqp2 = slotAfter.transform.GetChild(0).GetComponent<DraggableItem>().equipmentType;
-            Type slot1 = slotBefore.GetComponent<InventorySlot>().type;
-            EquipmentType sloteqp1 = slotBefore.GetComponent<InventorySlot>().equipmentType;
-
-            GameObject item1Stats = transform.GetChild(0).GetComponent<DraggableItem>().item;
-            GameObject item2Stats = slotAfter.transform.GetChild(0).GetComponent<DraggableItem>().item;
-
-            if (item1Stats.name == item2Stats.name)
+            if (slotBefore.GetComponent<InventorySlot>().type == Type.Equipment)
             {
-                if (item1Stats.GetComponent<ItemStats>().stack + item2Stats.GetComponent<ItemStats>().stack <= item2Stats.GetComponent<ItemStats>().maxStack)
-                {
-                    item2Stats.GetComponent<ItemStats>().stack += item1Stats.GetComponent<ItemStats>().stack;
-                    item2Stats.GetComponent<ItemStats>().itemUI.SetCapacity(item2Stats.GetComponent<ItemStats>().stack);
-                    Destroy(item1Stats.gameObject);
-                    Destroy(item1Stats.GetComponent<ItemStats>().itemUI);
-                    return;
-                }
-                else
-                {
-                    item1Stats.GetComponent<ItemStats>().stack -= (item2Stats.GetComponent<ItemStats>().maxStack - item2Stats.GetComponent<ItemStats>().stack);
-                    item1Stats.GetComponent <ItemStats>().itemUI.SetCapacity(item1Stats.GetComponent<ItemStats>().stack);
-                    item2Stats.GetComponent<ItemStats>().stack = item2Stats.GetComponent<ItemStats>().maxStack;
-                    item2Stats.GetComponent<ItemStats>().itemUI.SetCapacity(item2Stats.GetComponent<ItemStats>().stack);
-                    transform.GetChild(0).position = slotBefore.transform.position;
-                    transform.GetChild(0).SetParent(slotBefore.transform);
-                    return;
-                }
+                inventory.UnuseEquipment(item1);
+            }
+            else if (slotBefore.GetComponent<InventorySlot>().type == Type.Useable)
+            {
+                inventory.UnuseUseable(item1);
             }
 
-            if (CompareType(transform.GetChild(0).gameObject, item1, slot2, itemeqp1, sloteqp2) && CompareType(slotAfter.transform.GetChild(0).gameObject, item2, slot1, itemeqp2, sloteqp1))
+            inventory.DropItem(item1, item1UI);
+            return;
+        }
+
+        if (slotAfter.transform.childCount != 0) 
+        {
+            GameObject item2 = slotAfter.transform.GetChild(0).GetComponent<DraggableItem>().item;
+            GameObject item2UI = slotAfter.transform.GetChild(0).gameObject;
+
+            if (item1.name == item2.name)
             {
-                slotAfter.transform.GetChild(0).position = slotBefore.transform.position;
-                slotAfter.transform.GetChild(0).SetParent(slotBefore.transform);
-                transform.GetChild(0).position = slotAfter.transform.position;
-                transform.GetChild(0).SetParent(slotAfter.transform);
+                inventory.StackupItem(item1, item2);
+                return;
+            }
 
-                if (slotBefore.GetComponent<InventorySlot>().inventoryOrigin != slotAfter.GetComponent<InventorySlot>().inventoryOrigin)
+            if (CompareType(item1, item1UI.GetComponent<DraggableItem>().type, slotAfter.GetComponent<InventorySlot>().type, item1UI.GetComponent<DraggableItem>().equipmentType, slotAfter.GetComponent<InventorySlot>().equipmentType) && CompareType(item2, item1UI.GetComponent<DraggableItem>().type, slotBefore.GetComponent<InventorySlot>().type, item2UI.GetComponent<DraggableItem>().equipmentType, slotBefore.GetComponent<InventorySlot>().equipmentType))
+            {
+                item1UI.transform.SetParent(slotAfter.transform, false);
+                item1UI.transform.position = slotAfter.transform.position;
+                item2UI.transform.SetParent(slotBefore.transform, false);
+                item2UI.transform.position = slotBefore.transform.position;
+
+                if (slotBefore.GetComponent<InventorySlot>().type == Type.Equipment)
                 {
-                    item1Stats.transform.position = slotAfter.GetComponent<InventorySlot>().inventoryOrigin.transform.position;
-                    item1Stats.transform.SetParent(slotAfter.GetComponent<InventorySlot>().inventoryOrigin.transform);
-                    item2Stats.transform.position = slotBefore.GetComponent<InventorySlot>().inventoryOrigin.transform.position;
-                    item2Stats.transform.SetParent(slotBefore.GetComponent<InventorySlot>().inventoryOrigin.transform);
+                    inventory.UnuseEquipment(item1);
+                    inventory.UseEquipment(item2);
+                }
+                else if (slotBefore.GetComponent<InventorySlot>().type == Type.Useable)
+                {
+                    inventory.UnuseUseable(item1);
+                    inventory.UseUseable(item2);
                 }
 
-                if (slot1 == Type.Useable)
+                if (slotAfter.GetComponent<InventorySlot>().type == Type.Equipment)
                 {
-                    inventory.SetUseable();
+                    inventory.UnuseEquipment(item2);
+                    inventory.UseEquipment(item1);
                 }
-                if (slot2 == Type.Useable)
+                else if (slotAfter.GetComponent<InventorySlot>().type == Type.Useable)
                 {
-                    inventory.SetUseable();
-                }
-
-                if (slot1 == Type.Equipment)
-                {
-                    inventory.SetEquipment(null, item1, itemeqp1);
-                    inventory.SetEquipment(slotBefore.transform.GetChild(0).gameObject, item2, itemeqp2);
-                }
-                if (slot2 == Type.Equipment)
-                {
-                    inventory.SetEquipment(null, item2, itemeqp2);
-                    inventory.SetEquipment(slotAfter.transform.GetChild(0).GetComponent<DraggableItem>().item, item1, itemeqp1);
+                    inventory.UnuseUseable(item2);
+                    inventory.UseUseable(item1);
                 }
             }
             else
             {
-                transform.GetChild(0).position = slotBefore.transform.position;
-                transform.GetChild(0).SetParent(slotBefore.transform);
+                item1UI.transform.SetParent(slotBefore.transform, false);
+                item1UI.transform.position = slotBefore.transform.position;
             }
+
         }
         else
         {
-            GameObject item1Stats = transform.GetChild(0).GetComponent<DraggableItem>().item;
-            if (CompareType(transform.GetChild(0).gameObject, item1, slot2, itemeqp1, sloteqp2))
+            if (CompareType(item1, item1UI.GetComponent<DraggableItem>().type, slotAfter.GetComponent<InventorySlot>().type, item1UI.GetComponent<DraggableItem>().equipmentType, slotAfter.GetComponent<InventorySlot>().equipmentType))
             {
-                transform.GetChild(0).position = slotAfter.transform.position;
-                transform.GetChild(0).SetParent(slotAfter.transform);
+                item1UI.transform.SetParent(slotAfter.transform, false);
+                item1UI.transform.position = slotAfter.transform.position;
 
-                if (slotBefore.GetComponent<InventorySlot>().inventoryOrigin != slotAfter.GetComponent<InventorySlot>().inventoryOrigin)
-                {
-                    item1Stats.transform.position = slotAfter.GetComponent<InventorySlot>().inventoryOrigin.transform.position;
-                    item1Stats.transform.SetParent(slotAfter.GetComponent<InventorySlot>().inventoryOrigin.transform);
-                }
-
-                if (slotBefore.GetComponent<InventorySlot>().type == Type.Useable)
-                {
-                    inventory.SetUseable();
-                }
-                if (slot2 == Type.Useable)
-                {
-                    inventory.SetUseable();
-                }
-
-                if (slot2 == Type.Equipment)
-                {
-                    inventory.SetEquipment(slotAfter.transform.GetChild(0).GetComponent<DraggableItem>().item, item1, itemeqp1);
-                }
                 if (slotBefore.GetComponent<InventorySlot>().type == Type.Equipment)
                 {
-                    inventory.SetEquipment(null, item1, itemeqp1);
+                    inventory.UnuseEquipment(item1);
+                }
+                else if (slotBefore.GetComponent<InventorySlot>().type == Type.Useable)
+                {
+                    inventory.UnuseUseable(item1);
+                }
+
+                if (slotAfter.GetComponent<InventorySlot>().type == Type.Equipment)
+                {
+                    inventory.UseEquipment(item1);
+                }
+                else if (slotAfter.GetComponent<InventorySlot>().type == Type.Useable)
+                {
+                    inventory.UnuseUseable(item1);
                 }
             }
             else
             {
-                transform.GetChild(0).position = slotBefore.transform.position;
-                transform.GetChild(0).SetParent(slotBefore.transform);
+                item1UI.transform.SetParent(slotBefore.transform, false);
+                item1UI.transform.position = slotBefore.transform.position;
             }
         }
-    }
-
-    public void DropUIItem(GameObject item)
-    {
-        Type slotType = slotBefore.GetComponent<InventorySlot>().type;
-        EquipmentType slotEqpType = slotBefore.GetComponent<InventorySlot>().equipmentType;
-        inventory.StartDropItem(item, slotType, slotEqpType);
     }
 
     bool CompareType(GameObject item, Type itemType, Type slotType, EquipmentType itemEqpType, EquipmentType slotEqpType)
@@ -187,7 +159,7 @@ public class HoldItemTemporary : MonoBehaviour
     
     bool CheckRequiments(GameObject item)
     {
-        ItemStats stats = item.GetComponent<DraggableItem>().item.GetComponent<ItemStats>();
+        ItemStats stats = item.GetComponent<ItemStats>();
         return levelUpSystem.CompareStats(stats.STR, stats.DEX, stats.INT, stats.VGR, stats.END, stats.AGL);
     }
 }

@@ -40,6 +40,7 @@ public class PlayerStats : MonoBehaviour
     [SerializeField] private Image expBar;
     [SerializeField] private TextMeshProUGUI expText;
     [SerializeField] private TextMeshProUGUI levelText;
+    [SerializeField] public LevelUpSystem levelUpSystem;
 
     [Header("Other")]
     [SerializeField] public bool isUsingUseable;
@@ -83,6 +84,7 @@ public class PlayerStats : MonoBehaviour
         staminaBar.fillAmount = (float)stamina / (float)maxStamina;
         expText.text = exp + "/" + maxExp;
         expBar.fillAmount = (float)exp / (float)maxExp;
+        levelUpSystem.SetStats();
     }
 
     public void SetAdditionalAttributes(int AdditionalHealth, float AdditionalMoveSpeed, int AdditionalMinArmor, int AdditionalMaxArmor)
@@ -92,6 +94,7 @@ public class PlayerStats : MonoBehaviour
         additionalMoveSpeed += AdditionalMoveSpeed;
         minArmor += AdditionalMinArmor;
         maxArmor += AdditionalMaxArmor;
+        SetUIAttributes();
     }
 
     public void CollectExpOrb(GameObject orb)
@@ -105,6 +108,7 @@ public class PlayerStats : MonoBehaviour
         }
         Destroy(orb);
         SetUIAttributes();
+        levelUpSystem.SetStats();
     }
     
     public void SetHealth(int healthAdd)

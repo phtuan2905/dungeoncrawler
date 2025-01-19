@@ -5,7 +5,7 @@ using static UnityEngine.RuleTile.TilingRuleOutput;
 
 public class ItemStats : MonoBehaviour
 {
-    public DraggableItem itemUI;
+    public GameObject itemUI;
 
     [Header("Stats")]
     public int health;
@@ -32,11 +32,11 @@ public class ItemStats : MonoBehaviour
     public void UseUseableItem()
     {
         stack--;
-        itemUI.SetCapacity(stack);
+        itemUI.GetComponent<DraggableItem>().SetCapacity();
         if (stack == 0)
         {
             Destroy(itemUI.gameObject);
-            transform.parent.GetComponent<InventoryManage>().UseUseableItem();
+            //transform.parent.GetComponent<InventoryManage>().UseUseableItem();
             Destroy(gameObject);
         }
     }

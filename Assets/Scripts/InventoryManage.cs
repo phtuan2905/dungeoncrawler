@@ -24,10 +24,6 @@ public class InventoryManage : MonoBehaviour
     public GameObject Necklace;
     public GameObject Ring;
 
-    [Header("QuickSlot")]
-    public List<GameObject> quickSlots;
-    public int currentQuickSlot;
-
     [Header("Inventory")]
     [SerializeField] private int maxSlotsCapacity;
     public List<GameObject> items;
@@ -38,259 +34,85 @@ public class InventoryManage : MonoBehaviour
         playerAttack = transform.parent.GetComponent<PlayerAttack>();
     }
 
-    void AddItemUI(GameObject item)
-    {
-        foreach (Transform slot in inventoryUI.transform)
-        {
-            if (slot.gameObject.CompareTag("Inventory Slot") && slot.childCount == 0)
-            {
-                GameObject itemUIClone = Instantiate(itemUIPrefab, slot);
-                itemUIClone.GetComponent<DraggableItem>().SetItem(item, item.GetComponent<ItemStats>().type, item.GetComponent<ItemStats>().equipmentType);
-                item.GetComponent<ItemStats>().itemUI = itemUIClone.GetComponent<DraggableItem>();
-                itemUIClone.GetComponent<DraggableItem>().SetCapacity(item.GetComponent<ItemStats>().stack);
-                return;
-            }   
-        }
-    }
-
-    public void AddItem(GameObject itemAdd)
-    {
-        if (itemAdd.gameObject.CompareTag("Item"))
-        {
-            foreach (Transform item in transform)
-            {
-                if (item.name == itemAdd.name)
-                {
-                    if (itemAdd.GetComponent<ItemStats>().stack + item.GetComponent<ItemStats>().stack <= item.GetComponent<ItemStats>().maxStack)
-                    {
-                        item.GetComponent<ItemStats>().stack += itemAdd.GetComponent<ItemStats>().stack;
-                        item.GetComponent<ItemStats>().itemUI.SetCapacity(item.GetComponent<ItemStats>().stack);
-                        Destroy(itemAdd.gameObject);
-                        return;
-                    }
-                    else
-                    {
-                        itemAdd.GetComponent<ItemStats>().stack -= (item.GetComponent<ItemStats>().maxStack - item.GetComponent<ItemStats>().stack);
-                        item.GetComponent<ItemStats>().stack = item.GetComponent<ItemStats>().maxStack;
-                        item.GetComponent<ItemStats>().itemUI.SetCapacity(item.GetComponent<ItemStats>().stack);
-                    }
-                }
-            }
-            if (CheckEmptySlot())
-            {
-                itemAdd.GetComponent<BoxCollider2D>().enabled = false;
-                itemAdd.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
-                if (itemAdd.GetComponent<ItemStats>().type == Type.Useable)
-                {
-                    itemAdd.GetComponent<SpriteRenderer>().enabled = false;
-                }
-                itemAdd.gameObject.transform.SetParent(transform);
-                itemAdd.gameObject.SetActive(false);
-                AddItemUI(itemAdd.gameObject);
-            }
-        }
-    }
+    [Header("QuickSlot")]
+    public List<GameObject> quickSlots;
+    public int currentQuickSlot;
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        AddItem(collision.gameObject);
+        if (collision.gameObject.CompareTag("Item"))
+        {
+            PickupItem(collision.gameObject);
+        }
     }
 
-    public void SetEquipment(GameObject item, Type itemType, EquipmentType itemEqpType)
+    public void PickupItem(GameObject item)
     {
-        if (item != null)
+        if (FindItemInInventory(item) != null) 
         {
-            if (itemType == Type.Equipment)
+            GameObject itemInInventory = FindItemInInventory(item);
+            if (itemInInventory.GetComponent<ItemStats>().stack < item.GetComponent<ItemStats>().maxStack)
             {
-                GameObject cloneItem = Instantiate(item);
-                switch (itemEqpType)
+                itemInInventory.GetComponent<ItemStats>().stack += item.GetComponent<ItemStats>().stack;
+                item.GetComponent<ItemStats>().stack = itemInInventory.GetComponent<ItemStats>().stack - itemInInventory.GetComponent<ItemStats>().maxStack;
+                if (itemInInventory.GetComponent<ItemStats>().stack > itemInInventory.GetComponent<ItemStats>().maxStack)
                 {
-                    case EquipmentType.Helmet:
-                        cloneItem.transform.SetParent(Helmet.transform);
-                        cloneItem.transform.localPosition = Vector2.zero;
-                        cloneItem.SetActive(true);
-                        stats.SetAdditionalAttributes(item.GetComponent<ItemStats>().health, item.GetComponent<ItemStats>().moveSpeed, item.GetComponent<ItemStats>().minArmor, item.GetComponent<ItemStats>().maxArmor);
-                        break;
-                    case EquipmentType.Armor:
-                        cloneItem.transform.SetParent(Armor.transform);
-                        cloneItem.transform.localPosition = Vector2.zero;
-                        cloneItem.SetActive(true);
-                        stats.SetAdditionalAttributes(item.GetComponent<ItemStats>().health, item.GetComponent<ItemStats>().moveSpeed, item.GetComponent<ItemStats>().minArmor, item.GetComponent<ItemStats>().maxArmor);
-                        break;
-                    case EquipmentType.Glove:
-                        cloneItem.transform.SetParent(Glove.transform);
-                        cloneItem.transform.localPosition = Vector2.zero;
-                        cloneItem.transform.localEulerAngles = Vector3.zero;
-                        cloneItem.SetActive(true);
-                        stats.SetAdditionalAttributes(item.GetComponent<ItemStats>().health, item.GetComponent<ItemStats>().moveSpeed, item.GetComponent<ItemStats>().minArmor, item.GetComponent<ItemStats>().maxArmor);
-                        break;
-                    case EquipmentType.Shoe:
-                        cloneItem.transform.SetParent(Shoe1.transform);
-                        cloneItem.transform.localPosition = Vector2.zero;
-                        cloneItem.SetActive(true);
-                        GameObject shoeClone = Instantiate(item, Shoe2.transform);
-                        shoeClone.transform.localPosition = Vector2.zero;
-                        shoeClone.GetComponent<SpriteRenderer>().flipX = true;
-                        shoeClone.SetActive(true);
-                        stats.SetAdditionalAttributes(item.GetComponent<ItemStats>().health, item.GetComponent<ItemStats>().moveSpeed, item.GetComponent<ItemStats>().minArmor, item.GetComponent<ItemStats>().maxArmor);
-                        break;
-                    case EquipmentType.Weapon:
-                        cloneItem.transform.SetParent(Weapon.transform);
-                        cloneItem.transform.localPosition = Vector2.zero;
-                        cloneItem.transform.localEulerAngles = Vector3.zero;
-                        cloneItem.SetActive(true);
-                        playerAttack.SetWeapon(cloneItem);
-                        stats.SetAdditionalAttributes(item.GetComponent<ItemStats>().health, item.GetComponent<ItemStats>().moveSpeed, item.GetComponent<ItemStats>().minArmor, item.GetComponent<ItemStats>().maxArmor);
-                        break;
-                    case EquipmentType.Ring:
-                        break;
-                    case EquipmentType.Necklace:
-                        break;
+                    itemInInventory.GetComponent<ItemStats>().stack = itemInInventory.GetComponent<ItemStats>().maxStack;
+                }
+                itemInInventory.GetComponent<ItemStats>().itemUI.GetComponent<DraggableItem>().SetCapacity();
+                if (item.GetComponent<ItemStats>().stack <= 0)
+                {
+                    Destroy(item);
+                    return;
                 }
             }
         }
-        else
+
+        if (FindEmptyInventorySlotUI() != null)
         {
-            if (itemType == Type.Equipment)
+            item.transform.SetParent(transform, false);
+            item.transform.position = transform.position;
+
+            item.gameObject.SetActive(false);
+            item.GetComponent<BoxCollider2D>().enabled = false;
+            item.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
+
+            AddItemUI(item);
+        }
+    }
+
+    GameObject FindItemInInventory(GameObject findItem)
+    {
+        foreach (Transform item in transform) 
+        {
+            if (item.name == findItem.name)
             {
-                GameObject deleteItem;
-                switch (itemEqpType)
-                {
-                    case EquipmentType.Helmet:
-                        deleteItem = Helmet.transform.GetChild(0).gameObject;
-                        stats.SetAdditionalAttributes(deleteItem.GetComponent<ItemStats>().health * -1, deleteItem.GetComponent<ItemStats>().moveSpeed * -1, deleteItem.GetComponent<ItemStats>().minArmor * -1, deleteItem.GetComponent<ItemStats>().maxArmor * -1);
-                        Destroy(deleteItem);
-                        break;
-                    case EquipmentType.Armor:
-                        deleteItem = Armor.transform.GetChild(0).gameObject;
-                        stats.SetAdditionalAttributes(deleteItem.GetComponent<ItemStats>().health * -1, deleteItem.GetComponent<ItemStats>().moveSpeed * -1, deleteItem.GetComponent<ItemStats>().minArmor * -1, deleteItem.GetComponent<ItemStats>().maxArmor * -1);
-                        Destroy(deleteItem);
-                        break;
-                    case EquipmentType.Glove:
-                        deleteItem = Glove.transform.GetChild(0).gameObject;
-                        stats.SetAdditionalAttributes(deleteItem.GetComponent<ItemStats>().health * -1, deleteItem.GetComponent<ItemStats>().moveSpeed * -1, deleteItem.GetComponent<ItemStats>().minArmor * -1, deleteItem.GetComponent<ItemStats>().maxArmor * -1);
-                        Destroy(deleteItem);
-                        break;
-                    case EquipmentType.Shoe:
-                        deleteItem = Shoe1.transform.GetChild(0).gameObject;
-                        stats.SetAdditionalAttributes(deleteItem.GetComponent<ItemStats>().health * -1, deleteItem.GetComponent<ItemStats>().moveSpeed * -1, deleteItem.GetComponent<ItemStats>().minArmor * -1, deleteItem.GetComponent<ItemStats>().maxArmor * -1);
-                        Destroy(deleteItem);
-                        deleteItem = Shoe2.transform.GetChild(0).gameObject;
-                        Destroy(deleteItem);
-                        break;
-                    case EquipmentType.Weapon:
-                        deleteItem = Weapon.transform.GetChild(0).gameObject;
-                        playerAttack.SetWeapon(null);
-                        stats.SetAdditionalAttributes(deleteItem.GetComponent<ItemStats>().health * -1, deleteItem.GetComponent<ItemStats>().moveSpeed * -1, deleteItem.GetComponent<ItemStats>().minArmor * -1, deleteItem.GetComponent<ItemStats>().maxArmor * -1);
-                        Destroy(deleteItem);
-                        break;
-                    case EquipmentType.Ring:
-                        break;
-                    case EquipmentType.Necklace:
-                        break;
-                }
+                return item.gameObject;
             }
         }
-        stats.SetUIAttributes();
+        return null;
     }
 
-    public void SetUseable()
+    public void AddItemUI(GameObject addItem)
     {
-        for (int i = 0; i < 6; i++)
+        Transform slotUI = FindEmptyInventorySlotUI().transform;
+        GameObject itemUI = Instantiate(itemUIPrefab, slotUI);
+        addItem.GetComponent<ItemStats>().itemUI = itemUI;
+        itemUI.transform.position = slotUI.position;
+        itemUI.GetComponent<DraggableItem>().SetItem(addItem);
+        itemUI.GetComponent<DraggableItem>().SetCapacity();
+    }
+
+    GameObject FindEmptyInventorySlotUI()
+    {
+        foreach (Transform slotUI in inventoryUI.transform)
         {
-            if (quickSlotUI.transform.GetChild(i).childCount > 0)
+            if (slotUI.childCount == 0 && slotUI.CompareTag("Inventory Slot"))
             {
-                if (quickSlots[i] != null)
-                {
-                    quickSlots[i].SetActive(false);
-                }
-                quickSlots[i] = quickSlotUI.transform.GetChild(i).GetChild(0).GetComponent<DraggableItem>().item;
-                
-                //quickSlots[i].GetComponent<UseableItem>().enabled = false;
-            }
-            else
-            {
-                quickSlots[i] = null;
-            }
-        }
-        SetSelectQuickSlots(true);
-    }
-
-    private void Update()
-    {
-        SelectQuickSlots();
-    }
-
-    void SelectQuickSlots()
-    {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            SetSelectQuickSlots(false);
-            currentQuickSlot = 0;
-            SetSelectQuickSlots(true);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            SetSelectQuickSlots(false);
-            currentQuickSlot = 1;
-            SetSelectQuickSlots(true);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha3))
-        {
-            SetSelectQuickSlots(false);
-            currentQuickSlot = 2;
-            SetSelectQuickSlots(true);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha4))
-        {
-            SetSelectQuickSlots(false);
-            currentQuickSlot = 3;
-            SetSelectQuickSlots(true);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha5))
-        {
-            SetSelectQuickSlots(false);
-            currentQuickSlot = 4;
-            SetSelectQuickSlots(true);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha6))
-        {
-            SetSelectQuickSlots(false);
-            currentQuickSlot = 5;
-            SetSelectQuickSlots(true);
-        }
-        SetUISelectQuickSlots();
-    }
-
-    void SetSelectQuickSlots(bool option)
-    {
-        if (quickSlots[currentQuickSlot] != null)
-        {
-            quickSlots[currentQuickSlot].GetComponent<UseableItem>().enabled = option;
-            quickSlots[currentQuickSlot].SetActive(option);
-        }
-    }
-
-    void SetUISelectQuickSlots()
-    {
-        quickSlotSelectUI.transform.position = quickSlotUI.transform.GetChild(currentQuickSlot).position;
-    }
-
-    bool CheckEmptySlot()
-    {
-        foreach (Transform itemUI in inventoryUI.transform)
-        {
-            if (itemUI.childCount == 0 && itemUI.CompareTag("Inventory Slot"))
-            {
-                return true;
+                return slotUI.gameObject;
             }
         }
-        return false;
-    }
-
-    public void UseUseableItem()
-    {
-        SetUseable();
+        return null;
     }
 
     [Header("Drop Item")]
@@ -302,91 +124,168 @@ public class InventoryManage : MonoBehaviour
     [SerializeField] private TextMeshProUGUI dropNumberUI;
     [SerializeField] private TextMeshProUGUI maxDropNumberUI;
 
-    public void StartDropItem(GameObject item, Type slotType, EquipmentType slotEqpType)
+    public void DropItem(GameObject item, GameObject itemUI)
     {
-        ItemStats itemStats = item.GetComponent<ItemStats>();
-        dropNumber = itemStats.stack;
-        if (dropNumber == 1)
-        {
-            if (slotType == Type.Equipment)
-            {
-                SetEquipment(null, slotType, slotEqpType);
-                if (slotEqpType == EquipmentType.Weapon)
-                {
-                    playerAttack.SetWeapon(null);
-                }
-            }
-            if (item.GetComponent<ItemStats>().type == Type.Useable)
-            {
-                item.GetComponent<UseableItem>().enabled = false;
-            }
-            item.GetComponent<SpriteRenderer>().enabled = true;
-            item.transform.SetParent(null);
-            item.transform.position = transform.position + new Vector3(0, item.GetComponent<BoxCollider2D>().size.y + 0.1f + (GetComponent<BoxCollider2D>().size.y / 2f), 0);
-            item.GetComponent<BoxCollider2D>().enabled = true;
-            item.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
-            Destroy(item.GetComponent<ItemStats>().itemUI.gameObject);
-            item.SetActive(true);
-            dropPanel.SetActive(false);
-            return;
-        }
-        dropNumberUI.text = dropNumber.ToString();
-        maxDropNumberUI.text = dropNumber.ToString();
-        dropPanel.SetActive(true);
-        dropItem = item;
-        dropSlotType = slotType;
-        dropSlotEqpType = slotEqpType;
+        item.transform.SetParent(null);
+        item.transform.position = transform.position + Vector3.up * 1.5f;
+
+        item.gameObject.SetActive(true);
+        item.GetComponent<BoxCollider2D>().enabled = true;
+        item.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
+        DeleteItemUI(itemUI);
     }
 
-    public void ConfirmDrop()
+    void DeleteItemUI(GameObject deleteItemUI)
     {
-        GameObject dropItemClone = Instantiate(dropItem);
-        dropItemClone.name = dropItem.name;
-        if (dropSlotType == Type.Equipment)
+        Destroy(deleteItemUI);
+    }
+
+    public void StackupItem(GameObject item1, GameObject item2)
+    {
+        if (item1.GetComponent<ItemStats>().stack < item2.GetComponent<ItemStats>().maxStack)
         {
-            SetEquipment(null, dropSlotType, dropSlotEqpType);
-            if (dropSlotEqpType == EquipmentType.Weapon)
+            item1.GetComponent<ItemStats>().stack += item2.GetComponent<ItemStats>().stack;
+            item2.GetComponent<ItemStats>().stack = item1.GetComponent<ItemStats>().stack - item1.GetComponent<ItemStats>().maxStack;
+            if (item1.GetComponent<ItemStats>().stack > item1.GetComponent<ItemStats>().maxStack)
             {
+                item1.GetComponent<ItemStats>().stack = item1.GetComponent<ItemStats>().maxStack;
+            }
+            if (item2.GetComponent<ItemStats>().stack <= 0)
+            {
+                Destroy(item2);
+                DeleteItemUI(item2.GetComponent<ItemStats>().itemUI);
+            }
+            item1.GetComponent<ItemStats>().itemUI.GetComponent<DraggableItem>().SetCapacity();
+            if (item2 != null) item2.GetComponent<ItemStats>().itemUI.GetComponent<DraggableItem>().SetCapacity();
+        }
+    }
+
+    public void UseEquipment(GameObject itemEqp)
+    {
+        itemEqp.SetActive(true);
+        stats.SetAdditionalAttributes(itemEqp.GetComponent<ItemStats>().health, itemEqp.GetComponent<ItemStats>().moveSpeed, itemEqp.GetComponent<ItemStats>().minArmor, itemEqp.GetComponent<ItemStats>().maxArmor);
+        switch (itemEqp.GetComponent<ItemStats>().equipmentType)
+        {
+            case EquipmentType.Helmet:
+                itemEqp.transform.SetParent(Helmet.transform, false);
+                itemEqp.transform.position = Helmet.transform.position;
+                break;
+            case EquipmentType.Armor:
+                itemEqp.transform.SetParent(Armor.transform, false);
+                itemEqp.transform.position = Armor.transform.position;
+                break;
+            case EquipmentType.Glove:
+                itemEqp.transform.SetParent(Glove.transform, false);
+                itemEqp.transform.position = Glove.transform.position;
+                break;
+            case EquipmentType.Shoe:
+                itemEqp.transform.SetParent(Shoe1.transform, false);
+                itemEqp.transform.position = Shoe1.transform.position;
+                GameObject shoeClone = Instantiate(itemEqp);
+                shoeClone.transform.SetParent(Shoe2.transform, false);
+                shoeClone.transform.position = Shoe2.transform.position;
+                shoeClone.GetComponent<SpriteRenderer>().flipX = true;
+                break;
+            case EquipmentType.Weapon:
+                itemEqp.transform.SetParent(Weapon.transform, false);
+                itemEqp.transform.position = Weapon.transform.position;
+                playerAttack.SetWeapon(itemEqp);
+                break;
+            case EquipmentType.Necklace:
+
+                break;
+            case EquipmentType.Ring:
+
+                break;
+        }
+    }
+
+    public void UnuseEquipment(GameObject itemUneqp)
+    {
+        stats.SetAdditionalAttributes(itemUneqp.GetComponent<ItemStats>().health * -1, itemUneqp.GetComponent<ItemStats>().moveSpeed * -1f, itemUneqp.GetComponent<ItemStats>().minArmor * -1, itemUneqp.GetComponent<ItemStats>().maxArmor * -1);
+        itemUneqp.transform.SetParent(transform);
+        itemUneqp.transform.position = transform.position;
+        itemUneqp.SetActive(false);
+        switch (itemUneqp.GetComponent<ItemStats>().equipmentType)
+        {
+            case EquipmentType.Helmet:
+                break;
+            case EquipmentType.Armor:
+                break;
+            case EquipmentType.Glove:
+                break;
+            case EquipmentType.Shoe:
+                Destroy(Shoe2.transform.gameObject);
+                break;
+            case EquipmentType.Weapon:
                 playerAttack.SetWeapon(null);
-            }
-        }
-        if (dropItemClone.GetComponent<ItemStats>().type == Type.Useable)
-        {
-            dropItemClone.GetComponent<UseableItem>().enabled = false;
-        }
-        dropItemClone.GetComponent<SpriteRenderer>().enabled = true;
-        dropItemClone.transform.SetParent(null);
-        dropItemClone.transform.position = transform.position + new Vector3(0, dropItemClone.GetComponent<BoxCollider2D>().size.y + 0.1f + (GetComponent<BoxCollider2D>().size.y / 2f), 0);
-        dropItemClone.GetComponent<BoxCollider2D>().enabled = true;
-        dropItemClone.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
-        dropItemClone.GetComponent<ItemStats>().stack = dropNumber;
-        dropItemClone.SetActive(true);
-        SetActiveDropPanel();
+                break;
+            case EquipmentType.Necklace:
 
-        dropItem.GetComponent<ItemStats>().stack -= dropNumber;
-        dropItem.GetComponent <ItemStats>().itemUI.SetCapacity(dropItem.GetComponent<ItemStats>().stack);
-        if (dropItem.GetComponent<ItemStats>().stack == 0)
-        {
-            Destroy(dropItem.GetComponent<ItemStats>().itemUI.gameObject);
-            Destroy(dropItem);
+                break;
+            case EquipmentType.Ring:
+
+                break;
         }
     }
 
-    public void SetActiveDropPanel()
+    [SerializeField] private int currentUseableItemIndex;
+    [SerializeField] private GameObject currentUseableItem;
+    [SerializeField] private Transform selectedUseableItemUI;
+
+    private void Update()
     {
-        dropPanel.SetActive(false);
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            currentUseableItemIndex = 1;
+            SetSelectedUseableItemUI();
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            currentUseableItemIndex = 2;
+            SetSelectedUseableItemUI();
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            currentUseableItemIndex = 3;
+            SetSelectedUseableItemUI();
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            currentUseableItemIndex = 4;
+            SetSelectedUseableItemUI();
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            currentUseableItemIndex = 5;
+            SetSelectedUseableItemUI();
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha6))
+        {
+            currentUseableItemIndex = 6;
+            SetSelectedUseableItemUI();
+        }
     }
 
-    public void ChangeDropNumber(bool state)
+    void SetSelectedUseableItemUI()
     {
-        if (state && dropNumber < dropItem.GetComponent<ItemStats>().stack)
-        {
-            dropNumber++;
-        }
-        else if (!state && dropNumber > 1)
-        {
-            dropNumber--;
-        }
-        dropNumberUI.text = dropNumber.ToString();
+        if (quickSlotUI.transform.GetChild(currentUseableItemIndex).GetChild(0) != null) selectedUseableItemUI.position = quickSlotUI.transform.GetChild(currentUseableItemIndex).GetChild(0).position;
+    }
+
+    void SetActiveCurrentUseableItem(bool state)
+    {
+        quickSlotUI.transform.GetChild(currentUseableItemIndex).GetChild(0).GetComponent<DraggableItem>().item.GetComponent<UseableItem>().enabled = state;
+    }
+
+    public void UseUseable(GameObject itemUse)
+    {
+        itemUse.GetComponent<SpriteRenderer>().enabled = false;
+        SetActiveCurrentUseableItem(true);
+    }
+
+    public void UnuseUseable(GameObject itemUnuse)
+    {
+        itemUnuse.GetComponent<SpriteRenderer>().enabled = true;
+        SetActiveCurrentUseableItem(false);
     }
 }
