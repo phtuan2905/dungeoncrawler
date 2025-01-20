@@ -26,26 +26,37 @@ public class HoldItemTemporary : MonoBehaviour
             }
 
             inventory.DropItem(item1, item1UI);
+            inventory.SetSelectedUseableItem();
             return;
         }
 
-        if (slotAfter.transform.childCount != 0) 
+        if (slotAfter.transform.childCount > 0) 
         {
             GameObject item2 = slotAfter.transform.GetChild(0).GetComponent<DraggableItem>().item;
             GameObject item2UI = slotAfter.transform.GetChild(0).gameObject;
 
             if (item1.name == item2.name)
             {
-                inventory.StackupItem(item1, item2);
+                inventory.StackupItem(item2, item1);
+                item1UI.transform.SetParent(slotBefore.transform, false);
+                item1UI.transform.position = slotBefore.transform.position;
                 return;
             }
 
-            if (CompareType(item1, item1UI.GetComponent<DraggableItem>().type, slotAfter.GetComponent<InventorySlot>().type, item1UI.GetComponent<DraggableItem>().equipmentType, slotAfter.GetComponent<InventorySlot>().equipmentType) && CompareType(item2, item1UI.GetComponent<DraggableItem>().type, slotBefore.GetComponent<InventorySlot>().type, item2UI.GetComponent<DraggableItem>().equipmentType, slotBefore.GetComponent<InventorySlot>().equipmentType))
+            if (CompareType(item1, item1UI.GetComponent<DraggableItem>().type, slotAfter.GetComponent<InventorySlot>().type, item1UI.GetComponent<DraggableItem>().equipmentType, slotAfter.GetComponent<InventorySlot>().equipmentType) && CompareType(item2, item2UI.GetComponent<DraggableItem>().type, slotBefore.GetComponent<InventorySlot>().type, item2UI.GetComponent<DraggableItem>().equipmentType, slotBefore.GetComponent<InventorySlot>().equipmentType))
             {
                 item1UI.transform.SetParent(slotAfter.transform, false);
                 item1UI.transform.position = slotAfter.transform.position;
                 item2UI.transform.SetParent(slotBefore.transform, false);
                 item2UI.transform.position = slotBefore.transform.position;
+
+                if (slotBefore.GetComponent<InventorySlot>().inventoryOrigin != slotAfter.GetComponent<InventorySlot>().inventoryOrigin)
+                {
+                    item1.transform.SetParent(slotAfter.GetComponent<InventorySlot>().inventoryOrigin.transform, false);
+                    item1.transform.localPosition = Vector3.zero;
+                    item2.transform.SetParent(slotBefore.GetComponent<InventorySlot>().inventoryOrigin.transform, false);
+                    item2.transform.localPosition = Vector3.zero;
+                }
 
                 if (slotBefore.GetComponent<InventorySlot>().type == Type.Equipment)
                 {
@@ -68,6 +79,7 @@ public class HoldItemTemporary : MonoBehaviour
                     inventory.UnuseUseable(item2);
                     inventory.UseUseable(item1);
                 }
+                inventory.SetSelectedUseableItem();
             }
             else
             {
@@ -82,6 +94,12 @@ public class HoldItemTemporary : MonoBehaviour
             {
                 item1UI.transform.SetParent(slotAfter.transform, false);
                 item1UI.transform.position = slotAfter.transform.position;
+
+                if (slotBefore.GetComponent<InventorySlot>().inventoryOrigin != slotAfter.GetComponent<InventorySlot>().inventoryOrigin)
+                {
+                    item1.transform.SetParent(slotAfter.GetComponent<InventorySlot>().inventoryOrigin.transform, false);
+                    item1.transform.localPosition = Vector3.zero;
+                }
 
                 if (slotBefore.GetComponent<InventorySlot>().type == Type.Equipment)
                 {
@@ -98,8 +116,9 @@ public class HoldItemTemporary : MonoBehaviour
                 }
                 else if (slotAfter.GetComponent<InventorySlot>().type == Type.Useable)
                 {
-                    inventory.UnuseUseable(item1);
+                    inventory.UseUseable(item1);
                 }
+                inventory.SetSelectedUseableItem();
             }
             else
             {

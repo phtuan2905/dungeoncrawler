@@ -34,10 +34,6 @@ public class InventoryManage : MonoBehaviour
         playerAttack = transform.parent.GetComponent<PlayerAttack>();
     }
 
-    [Header("QuickSlot")]
-    public List<GameObject> quickSlots;
-    public int currentQuickSlot;
-
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Item"))
@@ -237,55 +233,69 @@ public class InventoryManage : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            currentUseableItemIndex = 1;
-            SetSelectedUseableItemUI();
+            currentUseableItemIndex = 0;
+            SetSelectedUseableItem();
         }
         else if (Input.GetKeyDown(KeyCode.Alpha2))
         {
-            currentUseableItemIndex = 2;
-            SetSelectedUseableItemUI();
+            currentUseableItemIndex = 1;
+            SetSelectedUseableItem();
         }
         else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
-            currentUseableItemIndex = 3;
-            SetSelectedUseableItemUI();
+            currentUseableItemIndex = 2;
+            SetSelectedUseableItem();
         }
         else if (Input.GetKeyDown(KeyCode.Alpha4))
         {
-            currentUseableItemIndex = 4;
-            SetSelectedUseableItemUI();
+            currentUseableItemIndex = 3;
+            SetSelectedUseableItem();
         }
         else if (Input.GetKeyDown(KeyCode.Alpha5))
         {
-            currentUseableItemIndex = 5;
-            SetSelectedUseableItemUI();
+            currentUseableItemIndex = 4;
+            SetSelectedUseableItem();
         }
         else if (Input.GetKeyDown(KeyCode.Alpha6))
         {
-            currentUseableItemIndex = 6;
-            SetSelectedUseableItemUI();
+            currentUseableItemIndex = 5;
+            SetSelectedUseableItem();
         }
     }
 
     void SetSelectedUseableItemUI()
     {
-        if (quickSlotUI.transform.GetChild(currentUseableItemIndex).GetChild(0) != null) selectedUseableItemUI.position = quickSlotUI.transform.GetChild(currentUseableItemIndex).GetChild(0).position;
+        selectedUseableItemUI.position = quickSlotUI.transform.GetChild(currentUseableItemIndex).position;
     }
 
-    void SetActiveCurrentUseableItem(bool state)
+    public void SetSelectedUseableItem()
     {
-        quickSlotUI.transform.GetChild(currentUseableItemIndex).GetChild(0).GetComponent<DraggableItem>().item.GetComponent<UseableItem>().enabled = state;
+        if (currentUseableItem != null)
+        {
+            currentUseableItem.GetComponent<UseableItem>().enabled = false;
+        }
+        if (quickSlotUI.transform.GetChild(currentUseableItemIndex).childCount > 0)
+        {
+            currentUseableItem = quickSlotUI.transform.GetChild(currentUseableItemIndex).GetChild(0).GetComponent<DraggableItem>().item;
+            currentUseableItem.GetComponent<UseableItem>().enabled = true;
+        }
+        else
+        {
+            currentUseableItem = null;
+        }
+        SetSelectedUseableItemUI();
+    }
+   
+    public void UseUseable(GameObject item)
+    {
+        item.GetComponent<SpriteRenderer>().enabled = false;
+        item.SetActive(true);
     }
 
-    public void UseUseable(GameObject itemUse)
+    public void UnuseUseable(GameObject item)
     {
-        itemUse.GetComponent<SpriteRenderer>().enabled = false;
-        SetActiveCurrentUseableItem(true);
-    }
-
-    public void UnuseUseable(GameObject itemUnuse)
-    {
-        itemUnuse.GetComponent<SpriteRenderer>().enabled = true;
-        SetActiveCurrentUseableItem(false);
+        item.GetComponent<SpriteRenderer>().enabled = true;
+        item.GetComponent<UseableItem>().enabled = false;
+        item.SetActive(false);
     }
 }
