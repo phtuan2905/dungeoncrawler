@@ -9,9 +9,15 @@ public class ProceduralDungeonGenerate : MonoBehaviour
     [SerializeField] private Tilemap groundTilemap;
     [SerializeField] private Tile groundTile;
 
-    [SerializeField] private Vector3Int currentRoomCenter;
-    [SerializeField] private Vector3Int corridorEndPoint;
     [SerializeField] private List<Vector3Int> ways;
+    [SerializeField] private List<Vector3Int> currentWays;
+    [SerializeField] private Vector3Int roomCenter;
+    [SerializeField] private Vector3Int roomSize;
+    [SerializeField] private int wayIndex;
+
+    [SerializeField] private int roomTotal;
+    [SerializeField] private List<Room> rooms;
+    [SerializeField] private int roomIndex;
 
     private void Awake()
     {         
@@ -19,30 +25,46 @@ public class ProceduralDungeonGenerate : MonoBehaviour
         ways.Add(Vector3Int.right);
         ways.Add(Vector3Int.down);
         ways.Add(Vector3Int.left);
-        DrawRoom(Vector3Int.zero, new Vector3Int(5, 5, 0));
-        Vector3Int roomCenter = (Vector3Int.zero + new Vector3Int(5, 5, 0)) / 2;
-        Vector3Int roomSize = new Vector3Int(5, 5, 0);
-        currentRoomCenter = roomCenter;
+        roomCenter = (Vector3Int.zero + new Vector3Int(5, 5, 0)) / 2;
+        roomSize = new Vector3Int(5, 5, 0);
+        DrawRoom(Vector3Int.zero, roomSize);
 
-        List<Vector3Int> currentWays = ways;
-        for (int i = 0; i < 3; i++)
+        Room baseRoom = Instantiate(new Room());
+        baseRoom.roomCenter = roomCenter;
+        baseRoom.roomSize = roomSize;
+        baseRoom.roomDirections = ways;
+        rooms.Add(baseRoom);
+
+        roomIndex = 0;
+        while (roomTotal > 0)
         {
-            int wayIndex = Random.Range(0, currentWays.Count);
-            DrawCorridor(currentRoomCenter + currentWays[wayIndex] * roomSize / 2, currentWays[wayIndex], 3);
-            corridorEndPoint = (currentRoomCenter + currentWays[wayIndex] * roomSize / 2 + currentWays[wayIndex] + currentWays[wayIndex] * 3);
-            roomSize = new Vector3Int(5, 5, 0);
-            roomCenter = (roomCenter + currentWays[wayIndex] * roomSize + currentWays[wayIndex] * 1 + currentWays[wayIndex]) + roomSize * currentWays[wayIndex] / 2;
-            DrawRoom(roomCenter - roomSize / 2, roomSize);
-            Vector3Int way = currentWays[wayIndex];
-            currentWays = ways;
-            currentWays.Remove(way);
-            currentRoomCenter = roomCenter;
+            int roomNumber = Random.Range(1, 3);
+            for (int i = 0; i < roomNumber; i++)
+            {
+                GenerateDungeon(rooms[roomIndex]);
+                roomIndex++;
+                roomTotal--;
+                if (roomTotal == 0) 
+                {
+                    break;
+                }
+            }
         }
+    }
 
-        Vector3Int room1Size = new Vector3Int(7, 3, 0);
-        Vector3Int room1Center = (roomCenter + Vector3Int.up * new Vector3Int(9, 5, 0) / 2 + Vector3Int.up * 1 + Vector3Int.up) + room1Size * Vector3Int.up / 2;
-        Vector3Int room1StartPoint = room1Center - room1Size / 2;
-        DrawRoom(room1StartPoint, room1Size);
+    void GenerateDungeon(Room parentRoom)
+    {
+        int directionIndex = Random.Range(0, parentRoom.roomDirections.Count);
+        Vector3Int wayStartPoint = parentRoom.roomCenter + parentRoom.roomDirections[directionIndex] * parentRoom.roomSize / 2;
+        DrawCorridor(wayStartPoint, parentRoom.roomDirections[directionIndex], 3);
+        Vector3Int wayEndPoint = parentRoom.roomCenter + parentRoom.roomDirections[directionIndex] * parentRoom.roomSize / 2 + parentRoom.roomDirections[directionIndex] + parentRoom.roomDirections[directionIndex] * 3;
+        Room newRoom = new Room();
+        newRoom.roomSize = new Vector3Int(5, 5, 0);
+        newRoom.roomCenter = wayEndPoint + parentRoom.roomDirections[directionIndex] * newRoom.roomSize / 2;
+        newRoom.parentRoom = parentRoom;
+        DrawRoom(newRoom.roomCenter - newRoom.roomSize / 2, newRoom.roomSize);
+        rooms.Add(newRoom);
+        parentRoom.roomDirections.Remove(parentRoom.roomDirections[directionIndex] * -1);
     }
 
     void DrawRoom(Vector3Int startPoint, Vector3Int roomSize)
@@ -63,4 +85,15 @@ public class ProceduralDungeonGenerate : MonoBehaviour
             groundTilemap.SetTile(startPoint + (direction * i), groundTile);
         }
     }
+}
+
+class Room
+{
+    public Room() { }
+
+    public Vector3Int roomCenter;
+    public Vector3Int roomSize;
+    public Room parentRoom;
+    public List<Vector3Int> roomDirections;
+
 }

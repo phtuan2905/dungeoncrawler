@@ -435,6 +435,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   groundTilemap: {fileID: 491720249}
   groundTile: {fileID: 11400000, guid: 3d76d74a4b8365340867ea7e69ab26fc, type: 2}
+  ways: []
+  currentWays: []
+  roomCenter: {x: 0, y: 0, z: 0}
+  roomSize: {x: 0, y: 0, z: 0}
+  wayIndex: 0
+  roomTotal: 5
+  roomIndex: 0
 --- !u!4 &2012814651
 Transform:
   m_ObjectHideFlags: 0
