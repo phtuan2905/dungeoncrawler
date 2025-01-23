@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEditor.ShaderKeywordFilter;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -8,6 +9,8 @@ public class ProceduralDungeonGenerate : MonoBehaviour
 {
     [SerializeField] private Tilemap groundTilemap;
     [SerializeField] private Tile groundTile;
+    [SerializeField] private Tilemap wallTilemap;
+    [SerializeField] private Tile wallTile;
 
     public List<Vector3Int> directions;
 
@@ -50,6 +53,7 @@ public class ProceduralDungeonGenerate : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space) && isNotGenerate)
         {
+            roomTotal = Random.Range(5, 31);
             groundTilemap.ClearAllTiles();
             isNotGenerate = false;
             GenerateDungeon();
@@ -123,14 +127,21 @@ public class ProceduralDungeonGenerate : MonoBehaviour
         {
             bonusLenght = wayStartPoint.x - minX;
         }
-        Vector3Int wayEndPoint = parentRoom.roomCenter + direction * parentRoom.roomSize / 2 + direction + direction * (3 + bonusLenght);
+        if (bonusLenght != 0)
+        {
+            if (CheckSpaceForRoom(parentRoom.roomCenter + direction * parentRoom.roomSize / 2 + direction + direction * 3 + direction * newRoom.roomSize / 2 - newRoom.roomSize / 2, newRoom.roomSize))
+            {
+                bonusLenght = 2;
+            }
+        }
+        Vector3Int wayEndPoint = parentRoom.roomCenter + direction * parentRoom.roomSize / 2 + direction + direction * (1 + bonusLenght);
         newRoom.roomCenter = wayEndPoint + direction * newRoom.roomSize / 2;
         newRoom.roomDirections = new List<Vector3Int>(directions);
         newRoom.roomDirections.Remove(direction * -1);
         Vector3Int roomStartPoint = newRoom.roomCenter - newRoom.roomSize / 2;
         Vector3Int roomEndPoint = roomStartPoint + newRoom.roomSize - Vector3Int.one;
 
-        DrawCorridor(wayStartPoint, parentRoom.roomDirections[directionIndex], 3 + bonusLenght);
+        DrawCorridor(wayStartPoint, parentRoom.roomDirections[directionIndex], 1 + bonusLenght);
         DrawRoom(newRoom.roomCenter - newRoom.roomSize / 2, newRoom.roomSize);
 
         rooms.Add(newRoom);
@@ -153,22 +164,98 @@ public class ProceduralDungeonGenerate : MonoBehaviour
         }
     }
 
+    /*void GenerateRoom(Room parentRoom)
+    {
+        //Debug.Log(parentRoom.roomCenter);
+        int directionIndex = Random.Range(0, parentRoom.roomDirections.Count);
+        Vector3Int direction = parentRoom.roomDirections[directionIndex];
+        Vector3Int wayStartPoint = parentRoom.roomCenter + direction * parentRoom.roomSize / 2;
+        Room newRoom = new Room();
+        int roomSizeX = Random.Range(4, 14);
+        if (roomSizeX % 2 == 0) roomSizeX++;
+        int roomSizeY = Random.Range(4, 14);
+        if (roomSizeY % 2 == 0) roomSizeY++;
+        newRoom.roomSize = new Vector3Int(roomSizeX, roomSizeY, 0);
+        newRoom.roomCenter = wayStartPoint + direction * newRoom.roomSize / 2;
+        newRoom.roomDirections = new List<Vector3Int>(directions);
+        newRoom.roomDirections.Remove(direction * -1);
+        Vector3Int roomStartPoint = newRoom.roomCenter - newRoom.roomSize / 2;
+        Vector3Int roomEndPoint = roomStartPoint + newRoom.roomSize - Vector3Int.one;
+        DrawRoom(newRoom.roomCenter - newRoom.roomSize / 2, newRoom.roomSize);
+
+        rooms.Add(newRoom);
+        parentRoom.roomDirections.Remove(direction);
+        if (roomStartPoint.x < minX)
+        {
+            minX = roomStartPoint.x;
+        }
+        if (roomStartPoint.y < minY)
+        {
+            minY = roomStartPoint.y;
+        }
+        if (roomEndPoint.x > maxX)
+        {
+            maxX = roomEndPoint.x;
+        }
+        if (roomEndPoint.y > maxY)
+        {
+            maxY = roomEndPoint.y;
+        }
+    }
+*/
     void DrawRoom(Vector3Int startPoint, Vector3Int roomSize)
     {
-        for (int x = 0; x < roomSize.x; x++)
+        for (int x = -1; x <= roomSize.x; x++)
         {
-            for (int y = 0; y < roomSize.y; y++)
+            for (int y = -1; y <= roomSize.y; y++)
             {
-                groundTilemap.SetTile(startPoint + new Vector3Int(x, y, 0), groundTile);
+                if (x == -1 || x == roomSize.x || y ==  roomSize.y || y == -1)
+                {
+                    if (groundTilemap.GetTile(startPoint + new Vector3Int(x, y, 0)) == null)
+                    {
+                        wallTilemap.SetTile(startPoint + new Vector3Int(x, y, 0), wallTile);
+                    }
+                }
+                else
+                {
+                    groundTilemap.SetTile(startPoint + new Vector3Int(x, y, 0), groundTile);
+                }
             }
         }
     }
 
     void DrawCorridor(Vector3Int startPoint, Vector3Int direction, int lenght)
     {
+        Vector3Int reverseDirection = new Vector3Int(direction.y, direction.x, 0);
         for (int i = 1; i <= lenght; i++)
         {
-            groundTilemap.SetTile(startPoint + (direction * i), groundTile);
+            for (int j = -1; j <= 1; j++)
+            {
+                if (j == -1 || j == 1)
+                {
+                    if (groundTilemap.GetTile(startPoint + (direction * i) + (reverseDirection * j)) == null)
+                    {
+                        wallTilemap.SetTile(startPoint + (direction * i) + (reverseDirection * j), wallTile);
+                    }
+                }
+                else
+                {
+                    wallTilemap.SetTile(startPoint + (direction * i), null);
+                    groundTilemap.SetTile(startPoint + (direction * i), groundTile);
+                }
+            }
         }
+    }
+
+    bool CheckSpaceForRoom(Vector3Int startPoint, Vector3Int spaceSize)
+    {
+        for (int x = -1; x <= spaceSize.x; x++)
+        {
+            for (int y = -1; y <= spaceSize.y; y++)
+            {
+                if (groundTilemap.GetTile(startPoint + new Vector3Int(x, y)) != null) return false;
+            }
+        }
+        return true;
     }
 }
