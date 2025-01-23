@@ -435,13 +435,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   groundTilemap: {fileID: 491720249}
   groundTile: {fileID: 11400000, guid: 3d76d74a4b8365340867ea7e69ab26fc, type: 2}
-  ways: []
-  currentWays: []
-  roomCenter: {x: 0, y: 0, z: 0}
-  roomSize: {x: 0, y: 0, z: 0}
-  wayIndex: 0
-  roomTotal: 5
+  directions: []
+  roomTotal: 10
+  rooms:
+  - roomCenter: {x: 0, y: 0, z: 0}
+    roomSize: {x: 0, y: 0, z: 0}
+    roomDirections: []
   roomIndex: 0
+  maxRoomNumber: 2
+  minX: 0
+  maxX: 0
+  minY: 0
+  maxY: 0
 --- !u!4 &2012814651
 Transform:
   m_ObjectHideFlags: 0
@@ -462,5 +467,5 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 1942262753}
-  - {fileID: 2012814651}
   - {fileID: 1096680529}
+  - {fileID: 2012814651}
