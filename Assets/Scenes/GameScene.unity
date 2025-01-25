@@ -435,9 +435,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   groundTilemap: {fileID: 491720249}
   groundTile: {fileID: 11400000, guid: b4a72a509481943459eb5092db7ccc1f, type: 2}
+  wallTilemap: {fileID: 491720249}
   wallTile: {fileID: 11400000, guid: 85ebe5ccd1e3da448a50117bf6fcfdf8, type: 2}
   directions: []
-  roomTotal: 100
+  roomTotal: 20
   rooms:
   - roomCenter: {x: 0, y: 0, z: 0}
     roomSize: {x: 0, y: 0, z: 0}
