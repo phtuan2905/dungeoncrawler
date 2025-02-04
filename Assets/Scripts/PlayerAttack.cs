@@ -33,7 +33,11 @@ public class PlayerAttack : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.CompareTag("Obstacle"))
+        //if (collision.gameObject.CompareTag("Obstacle"))
+        //{
+        //    EndAttack();
+        //}
+        if (!collision.gameObject.CompareTag("Enemy") && !collision.gameObject.CompareTag("Object"))
         {
             EndAttack();
         }
@@ -61,7 +65,7 @@ public class PlayerAttack : MonoBehaviour
         {
             attackType = 1;
             animator.SetFloat("AttackSpeedMultiplier", stats.attackSpeed);
-            playerWeapon.size = new Vector2(0.32f, 0.32f);
+            playerWeapon.size = new Vector2(0.25f, 0.25f);
             playerWeapon.offset = Vector2.zero;
         }
     }

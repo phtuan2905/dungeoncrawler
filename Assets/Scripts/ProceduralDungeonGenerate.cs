@@ -11,6 +11,15 @@ public class ProceduralDungeonGenerate : MonoBehaviour
     [SerializeField] private Tile groundTile;
     [SerializeField] private Tilemap wallTilemap;
     [SerializeField] private Tile wallTile;
+    [SerializeField] private GameObject horizontalDoor;
+    [SerializeField] private GameObject verticalDoor;
+    [SerializeField] private Tilemap objectTilemap;
+    [SerializeField] private Tile objectTile;
+    //[SerializeField] private List<RuleTile> objectPlaceholderTile;
+    [SerializeField] private List<GameObject> objects;
+    [SerializeField] private float objectFillPercent;
+    [SerializeField] private Tilemap lightTilemap;
+    [SerializeField] private RuleTile spotLightTile;                                                                                  
 
     public List<Vector3Int> directions;
 
@@ -49,16 +58,16 @@ public class ProceduralDungeonGenerate : MonoBehaviour
 
     bool isNotGenerate;
 
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space) && isNotGenerate)
-        {
-            roomTotal = Random.Range(5, 31);
-            groundTilemap.ClearAllTiles();
-            isNotGenerate = false;
-            GenerateDungeon();
-        }
-    }
+    //private void Update()
+    //{
+    //    if (Input.GetKeyDown(KeyCode.Space) && isNotGenerate)
+    //    {
+    //        roomTotal = Random.Range(5, 31);
+    //        groundTilemap.ClearAllTiles();
+    //        isNotGenerate = false;
+    //        GenerateDungeon();
+    //    }
+    //}
 
     void GenerateDungeon()
     {
@@ -70,6 +79,7 @@ public class ProceduralDungeonGenerate : MonoBehaviour
 
         Room baseRoom = new Room();
         baseRoom.roomCenter = roomCenter;
+        lightTilemap.SetTile(roomCenter, spotLightTile);
         baseRoom.roomSize = roomSize;
         baseRoom.roomDirections = new List<Vector3Int>(directions);
         rooms.Add(baseRoom);
@@ -143,6 +153,8 @@ public class ProceduralDungeonGenerate : MonoBehaviour
 
         DrawCorridor(wayStartPoint, parentRoom.roomDirections[directionIndex], 1 + bonusLenght);
         DrawRoom(newRoom.roomCenter - newRoom.roomSize / 2, newRoom.roomSize);
+        LightSetup(newRoom.roomCenter - newRoom.roomSize / 2, newRoom.roomSize);
+        PlacingObjectInRoom(newRoom.roomCenter - newRoom.roomSize / 2, newRoom.roomSize);
 
         rooms.Add(newRoom);
         parentRoom.roomDirections.Remove(direction);
@@ -224,6 +236,112 @@ public class ProceduralDungeonGenerate : MonoBehaviour
         }
     }
 
+    void LightSetup(Vector3Int startPoint, Vector3Int roomSize)
+    {
+        for (int x = 2; x < roomSize.x; x += 3)
+        {
+            for (int y = 2; y < roomSize.y; y += 3)
+            {
+                lightTilemap.SetTile(startPoint + new Vector3Int(x, y, 0), spotLightTile);
+            }
+        }
+    }
+
+    void PlacingObjectInRoom(Vector3Int startPoint, Vector3Int roomSize)
+    {
+        int objectNumber = (int)(roomSize.x * roomSize.y * objectFillPercent);
+        while (objectNumber > 0)
+        {
+            int randomObject = Random.Range(0, objects.Count);
+            Vector3Int objectSize = objects[randomObject].GetComponent<ObjectSize>().objectSize;
+            int randomX = Random.Range(0, roomSize.x + 1);
+            int randomY = Random.Range(0, roomSize.y + 1);
+            int randomAxis = -1;
+            if (objects[randomObject].GetComponent<ObjectSize>().objectType == ObjectType.vertical)
+            {
+                randomAxis = Random.Range(0, 2);
+            }
+            else if (objects[randomObject].GetComponent<ObjectSize>().objectType == ObjectType.up) 
+            {
+                randomAxis = 3;
+            }
+            else if (objects[randomObject].GetComponent<ObjectSize>().objectType == ObjectType.down)
+            {
+                randomAxis = 2;
+            }
+            else if (objects[randomObject].GetComponent<ObjectSize>().objectType == ObjectType.right)
+            {
+                randomAxis = 1;
+            }
+            else if (objects[randomObject].GetComponent<ObjectSize>().objectType == ObjectType.left)
+            {
+                randomAxis = 0;
+            }
+            bool canPlaceObject = false;
+            for (int i = 0; i < 3; i++)
+            {
+                switch (randomAxis)
+                {
+                    case -1:
+                        break;
+                    case 0: 
+                        randomX = 0; 
+                        break;
+                    case 1:
+                        randomX = roomSize.x - 1;
+                        break;
+                    case 2:
+                        randomY = 0;
+                        break;
+                    case 3:
+                        randomY = roomSize.y - 1;
+                        break;
+                }
+                if (CheckSpaceForObject(startPoint + new Vector3Int(randomX, randomY, 0), objectSize)) {
+                    canPlaceObject = true;
+                    break;
+                }
+                else
+                {
+                    randomX = Random.Range(0, roomSize.x);
+                    randomY = Random.Range(0, roomSize.y);
+                }
+            }
+            if (canPlaceObject)
+            {
+                GameObject objectClone = Instantiate(objects[randomObject], objectTilemap.transform);
+                objectClone.transform.position = objectTilemap.CellToWorld(startPoint + new Vector3Int(randomX, randomY, 0));
+                //objectTilemap.SetTile(startPoint + new Vector3Int(randomX, randomY, 0), objectPlaceholderTile[randomObject]);
+                DrawObject(startPoint + new Vector3Int(randomX, randomY, 0), objectSize);
+            }
+            objectNumber--;
+        }
+    }
+
+    void DrawObject(Vector3Int startPoint, Vector3Int objectSize)
+    {
+        for (int x = 0; x < objectSize.x; x++)
+        {
+            for (int y = 0; y < objectSize.y; y++)
+            {
+                //if (x == 0 && y == 0) continue;
+                objectTilemap.SetTile(startPoint + new Vector3Int(x, y, 0), objectTile);
+            }
+        }
+    }
+
+    bool CheckSpaceForObject(Vector3Int startPoint, Vector3Int spaceSize)
+    {
+        for (int x = 0; x < spaceSize.x; x++)
+        {
+            for (int y = 0; y < spaceSize.y; y++)
+            {
+                if (groundTilemap.GetTile(startPoint + new Vector3Int(x, y)) != groundTile || objectTilemap.GetTile(startPoint + new Vector3Int(x, y)) != null) return false;
+            }
+        }
+        return true;
+    }
+
     void DrawCorridor(Vector3Int startPoint, Vector3Int direction, int lenght)
     {
         Vector3Int reverseDirection = new Vector3Int(direction.y, direction.x, 0);
@@ -240,6 +358,21 @@ public class ProceduralDungeonGenerate : MonoBehaviour
                 }
                 else
                 {
+                    if ((i == 1 || i == lenght))
+                    {
+                        if (direction.x == 0)
+                        {
+                            GameObject doorClone = Instantiate(horizontalDoor);
+                            doorClone.transform.position = groundTilemap.GetCellCenterWorld(startPoint + (direction * i));
+                            doorClone.transform.parent = groundTilemap.transform;
+                        }
+                        else
+                        {
+                            GameObject doorClone = Instantiate(verticalDoor);
+                            doorClone.transform.position = groundTilemap.GetCellCenterWorld(startPoint + (direction * i));
+                            doorClone.transform.parent = groundTilemap.transform;
+                        }
+                    }
                     wallTilemap.SetTile(startPoint + (direction * i), null);
                     groundTilemap.SetTile(startPoint + (direction * i), groundTile);
                 }

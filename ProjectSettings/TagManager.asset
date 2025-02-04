@@ -9,6 +9,7 @@ TagManager:
   - Enemy
   - Inventory Slot
   - Item
+  - Door
   layers:
   - Default
   - TransparentFX
@@ -45,25 +46,4 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
-    locked: 0
-  - name: Leg
-    uniqueID: 1171172029
-    locked: 0
-  - name: Body
-    uniqueID: 241810167
-    locked: 0
-  - name: Head
-    uniqueID: 2702089251
-    locked: 0
-  - name: Weapon
-    uniqueID: 534311379
-    locked: 0
-  - name: Hand
-    uniqueID: 3790253231
-    locked: 0
-  - name: Armor
-    uniqueID: 3337808169
-    locked: 0
-  - name: Effect
-    uniqueID: 3347702937
     locked: 0

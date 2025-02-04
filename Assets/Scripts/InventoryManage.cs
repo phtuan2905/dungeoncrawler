@@ -165,22 +165,27 @@ public class InventoryManage : MonoBehaviour
             case EquipmentType.Helmet:
                 itemEqp.transform.SetParent(Helmet.transform, false);
                 itemEqp.transform.position = Helmet.transform.position;
+                //Helmet.transform.parent.GetComponent<SpriteRenderer>().enabled = false;
                 break;
             case EquipmentType.Armor:
                 itemEqp.transform.SetParent(Armor.transform, false);
                 itemEqp.transform.position = Armor.transform.position;
+                //Armor.transform.parent.GetComponent<SpriteRenderer>().enabled = false;
                 break;
             case EquipmentType.Glove:
                 itemEqp.transform.SetParent(Glove.transform, false);
                 itemEqp.transform.position = Glove.transform.position;
+                //Glove.transform.parent.GetComponent<SpriteRenderer>().enabled = false;
                 break;
             case EquipmentType.Shoe:
                 itemEqp.transform.SetParent(Shoe1.transform, false);
                 itemEqp.transform.position = Shoe1.transform.position;
+                //Shoe1.transform.parent.GetComponent<SpriteRenderer>().enabled = false;
                 GameObject shoeClone = Instantiate(itemEqp);
                 shoeClone.transform.SetParent(Shoe2.transform, false);
                 shoeClone.transform.position = Shoe2.transform.position;
                 shoeClone.GetComponent<SpriteRenderer>().flipX = true;
+                //Shoe2.transform.parent.GetComponent<SpriteRenderer>().enabled = false;
                 break;
             case EquipmentType.Weapon:
                 itemEqp.transform.SetParent(Weapon.transform, false);
@@ -205,12 +210,18 @@ public class InventoryManage : MonoBehaviour
         switch (itemUneqp.GetComponent<ItemStats>().equipmentType)
         {
             case EquipmentType.Helmet:
+                //Helmet.transform.parent.GetComponent<SpriteRenderer>().enabled = true;
                 break;
             case EquipmentType.Armor:
+                //Armor.transform.parent.GetComponent<SpriteRenderer>().enabled = true;
                 break;
             case EquipmentType.Glove:
+                //Glove.transform.parent.GetComponent<SpriteRenderer>().enabled = true;
+                itemUneqp.transform.rotation = Quaternion.Euler(0, 0, 0);
                 break;
             case EquipmentType.Shoe:
+                //Shoe1.transform.parent.GetComponent<SpriteRenderer>().enabled = true;
+                //Shoe2.transform.parent.GetComponent<SpriteRenderer>().enabled = true;
                 Destroy(Shoe2.transform.gameObject);
                 break;
             case EquipmentType.Weapon:

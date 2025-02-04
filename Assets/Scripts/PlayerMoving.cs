@@ -76,4 +76,20 @@ public class PlayerMoving : MonoBehaviour
             animator.SetBool("IsRunning", false);
         }
     }
+
+    //private void OnCollisionEnter2D(Collision2D collision)
+    //{
+    //    if (collision.gameObject.CompareTag("Door"))
+    //    {
+    //        collision.gameObject.GetComponent<DoorControl>().ControlDoor(true);
+    //    }
+    //}
+
+    //private void OnTriggerExit2D(Collider2D collision)
+    //{
+    //    if (collision.gameObject.CompareTag("Door"))
+    //    {
+    //        collision.gameObject.GetComponent<DoorControl>().ControlDoor(false);
+    //    }
+    //}
 }

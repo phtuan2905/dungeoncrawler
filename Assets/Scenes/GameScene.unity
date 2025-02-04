@@ -176,7 +176,7 @@ TilemapRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -437,6 +437,12 @@ MonoBehaviour:
   groundTile: {fileID: 11400000, guid: b4a72a509481943459eb5092db7ccc1f, type: 2}
   wallTilemap: {fileID: 491720249}
   wallTile: {fileID: 11400000, guid: 85ebe5ccd1e3da448a50117bf6fcfdf8, type: 2}
+  horizontalDoor: {fileID: 0}
+  verticalDoor: {fileID: 0}
+  objectTilemap: {fileID: 0}
+  objectTile: {fileID: 0}
+  objects: []
+  objectFillPercent: 0
   directions: []
   roomTotal: 20
   rooms:

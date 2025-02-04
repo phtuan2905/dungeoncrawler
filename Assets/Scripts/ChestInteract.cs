@@ -27,6 +27,8 @@ public class ChestInteract : MonoBehaviour
             }
         }
 
+        //Random Add Item
+
         foreach (Transform item in transform)
         {
             CreateItemUI(item.gameObject, FindEmptySlot());
