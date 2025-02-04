@@ -7,10 +7,13 @@ using UnityEngine.Tilemaps;
 
 public class ProceduralDungeonGenerate : MonoBehaviour
 {
+    [SerializeField] private DungeonLevelPattern dungeonLevelPattern;
     [SerializeField] private Tilemap groundTilemap;
-    [SerializeField] private Tile groundTile;
+    [SerializeField] private RuleTile groundTile;
     [SerializeField] private Tilemap wallTilemap;
-    [SerializeField] private Tile wallTile;
+    [SerializeField] private RuleTile wallTile;
+    [SerializeField] private RuleTile corridorGroundTile;
+    [SerializeField] private RuleTile corridorWallTile;
     [SerializeField] private GameObject horizontalDoor;
     [SerializeField] private GameObject verticalDoor;
     [SerializeField] private Tilemap objectTilemap;
@@ -19,10 +22,14 @@ public class ProceduralDungeonGenerate : MonoBehaviour
     [SerializeField] private List<GameObject> objects;
     [SerializeField] private float objectFillPercent;
     [SerializeField] private Tilemap lightTilemap;
-    [SerializeField] private RuleTile spotLightTile;                                                                                  
+    [SerializeField] private RuleTile spotLightTile;
+    [SerializeField] private GameObject chest;
+    [SerializeField] private int chestNumber;
 
     public List<Vector3Int> directions;
 
+    [SerializeField] private int minRoomSize;
+    [SerializeField] private int maxRoomSize;
     [SerializeField] private int roomTotal;
     [SerializeField] private List<Room> rooms;
     [SerializeField] private int roomIndex;
@@ -44,6 +51,7 @@ public class ProceduralDungeonGenerate : MonoBehaviour
         public Vector3Int roomCenter;
         public Vector3Int roomSize;
         public List<Vector3Int> roomDirections;
+        public int roomTier;
     }
 
     private void Awake()
@@ -53,6 +61,8 @@ public class ProceduralDungeonGenerate : MonoBehaviour
         directions.Add(Vector3Int.down);
         directions.Add(Vector3Int.left);
         isNotGenerate = false;
+        groundTile = dungeonLevelPattern.rooms[0].floorTile;
+        wallTile = dungeonLevelPattern.rooms[0].wallTile;
         GenerateDungeon();
     }
 
@@ -82,7 +92,10 @@ public class ProceduralDungeonGenerate : MonoBehaviour
         lightTilemap.SetTile(roomCenter, spotLightTile);
         baseRoom.roomSize = roomSize;
         baseRoom.roomDirections = new List<Vector3Int>(directions);
+        baseRoom.roomTier = 0;
         rooms.Add(baseRoom);
+
+        chestNumber = roomTotal / 5;
 
         maxX = 5;
         maxY = 5;
@@ -105,8 +118,17 @@ public class ProceduralDungeonGenerate : MonoBehaviour
             }
             roomIndex++;
         }
+
+        for (int i = 0; i < chestNumber; i++)
+        {
+            int randomRoomIndex = Random.Range(1, rooms.Count);
+            Room newRoom = rooms[randomRoomIndex];
+            PlacingChest(newRoom.roomCenter - newRoom.roomSize / 2, newRoom.roomSize, newRoom.roomCenter);
+        }
+
         isNotGenerate = true;
     }
+
 
     void GenerateRoom(Room parentRoom)
     {
@@ -115,9 +137,9 @@ public class ProceduralDungeonGenerate : MonoBehaviour
         Vector3Int direction = parentRoom.roomDirections[directionIndex];
         Vector3Int wayStartPoint = parentRoom.roomCenter + direction * parentRoom.roomSize / 2;
         Room newRoom = new Room();
-        int roomSizeX = Random.Range(4, 14);
+        int roomSizeX = Random.Range(minRoomSize, maxRoomSize);
         if (roomSizeX % 2 == 0) roomSizeX++;
-        int roomSizeY = Random.Range(4, 14);
+        int roomSizeY = Random.Range(minRoomSize, maxRoomSize);
         if (roomSizeY % 2 == 0) roomSizeY++;
         newRoom.roomSize = new Vector3Int(roomSizeX, roomSizeY, 0);
         int bonusLenght = 0;
@@ -148,6 +170,7 @@ public class ProceduralDungeonGenerate : MonoBehaviour
         newRoom.roomCenter = wayEndPoint + direction * newRoom.roomSize / 2;
         newRoom.roomDirections = new List<Vector3Int>(directions);
         newRoom.roomDirections.Remove(direction * -1);
+        newRoom.roomTier = parentRoom.roomTier + 1;
         Vector3Int roomStartPoint = newRoom.roomCenter - newRoom.roomSize / 2;
         Vector3Int roomEndPoint = roomStartPoint + newRoom.roomSize - Vector3Int.one;
 
@@ -215,8 +238,10 @@ public class ProceduralDungeonGenerate : MonoBehaviour
         }
     }
 */
+
     void DrawRoom(Vector3Int startPoint, Vector3Int roomSize)
     {
+        GetRoomPattern();
         for (int x = -1; x <= roomSize.x; x++)
         {
             for (int y = -1; y <= roomSize.y; y++)
@@ -234,6 +259,14 @@ public class ProceduralDungeonGenerate : MonoBehaviour
                 }
             }
         }
+    }
+
+    void GetRoomPattern()
+    {
+        int randomIndex = Random.Range(0, dungeonLevelPattern.rooms.Count);
+        groundTile = dungeonLevelPattern.rooms[randomIndex].floorTile;
+        wallTile = dungeonLevelPattern.rooms[randomIndex].wallTile;
+        objects = dungeonLevelPattern.rooms[randomIndex].decorations;
     }
 
     void LightSetup(Vector3Int startPoint, Vector3Int roomSize)
@@ -254,8 +287,8 @@ public class ProceduralDungeonGenerate : MonoBehaviour
         {
             int randomObject = Random.Range(0, objects.Count);
             Vector3Int objectSize = objects[randomObject].GetComponent<ObjectSize>().objectSize;
-            int randomX = Random.Range(0, roomSize.x + 1);
-            int randomY = Random.Range(0, roomSize.y + 1);
+            int randomX = Random.Range(0, roomSize.x - 1);
+            int randomY = Random.Range(0, roomSize.y - 1);
             int randomAxis = -1;
             if (objects[randomObject].GetComponent<ObjectSize>().objectType == ObjectType.vertical)
             {
@@ -318,6 +351,31 @@ public class ProceduralDungeonGenerate : MonoBehaviour
         }
     }
 
+    void PlacingChest(Vector3Int startPoint, Vector3Int roomSize, Vector3Int roomCenter)
+    {
+        int randomX = Random.Range(0, roomSize.x - 1);
+        int randomY = Random.Range(0, roomSize.y - 1);
+        bool canPlace = false;
+        for (int i = 0; i < 3; i++)
+        {
+            if (startPoint.x + randomX != roomCenter.x && startPoint.y + randomY != roomCenter.y && CheckSpaceForObject(startPoint + new Vector3Int(randomX, randomY, 0), new Vector3Int(1, 1, 0)))
+            {
+                canPlace = true; 
+                break;
+            }
+            else
+            {
+                randomX = Random.Range(0, roomSize.x - 1);
+                randomY = Random.Range(0, roomSize.y - 1);
+            }
+        }
+        if (canPlace)
+        {
+            GameObject chestClone = Instantiate(chest, objectTilemap.transform);
+            chestClone.transform.position = objectTilemap.GetCellCenterWorld(startPoint + new Vector3Int(randomX, randomY, 0));
+        }
+    }
+
     void DrawObject(Vector3Int startPoint, Vector3Int objectSize)
     {
         for (int x = 0; x < objectSize.x; x++)
@@ -345,6 +403,7 @@ public class ProceduralDungeonGenerate : MonoBehaviour
     void DrawCorridor(Vector3Int startPoint, Vector3Int direction, int lenght)
     {
         Vector3Int reverseDirection = new Vector3Int(direction.y, direction.x, 0);
+        GetCorridorPattern();
         for (int i = 1; i <= lenght; i++)
         {
             for (int j = -1; j <= 1; j++)
@@ -378,6 +437,13 @@ public class ProceduralDungeonGenerate : MonoBehaviour
                 }
             }
         }
+    }
+
+    void GetCorridorPattern()
+    {
+        int randomIndex = Random.Range(0, dungeonLevelPattern.corridors.Count);
+        groundTile = dungeonLevelPattern.corridors[randomIndex].floorTile;
+        wallTile = dungeonLevelPattern.corridors[randomIndex].wallTile;
     }
 
     bool CheckSpaceForRoom(Vector3Int startPoint, Vector3Int spaceSize)

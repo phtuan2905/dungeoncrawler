@@ -146,3 +146,4 @@ MonoBehaviour:
   chestUIManager: {fileID: 0}
   chestUI: {fileID: 6678456921829668843, guid: 2de7846eea1915e4aa6f40c20b04dd90, type: 3}
   itemUIPrefab: {fileID: 7489482253927315095, guid: b73e6f0f7fad624468ad241eb6d7ec49, type: 3}
+  itemsPool: {fileID: 11400000, guid: cdc0610b7c14f6f4aa86c76b690ee4b2, type: 2}

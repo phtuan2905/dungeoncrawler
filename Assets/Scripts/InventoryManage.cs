@@ -222,7 +222,7 @@ public class InventoryManage : MonoBehaviour
             case EquipmentType.Shoe:
                 //Shoe1.transform.parent.GetComponent<SpriteRenderer>().enabled = true;
                 //Shoe2.transform.parent.GetComponent<SpriteRenderer>().enabled = true;
-                Destroy(Shoe2.transform.gameObject);
+                Destroy(Shoe2.transform.GetChild(0).gameObject);
                 break;
             case EquipmentType.Weapon:
                 playerAttack.SetWeapon(null);

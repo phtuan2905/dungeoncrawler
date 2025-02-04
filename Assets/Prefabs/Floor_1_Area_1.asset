@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7cf895e6c23f2d4090b3ac85bb10441, type: 3}
+  m_Name: Floor_1_Area_1
+  m_EditorClassIdentifier: 
+  rooms:
+  - minSize: 4
+    maxSize: 12
+    floorTile: {fileID: 11400000, guid: acf2160654601d84982c1d706b615e12, type: 2}
+    wallTile: {fileID: 11400000, guid: 04f2b5c41a7fe8347802e94eede98965, type: 2}
+    decorations:
+    - {fileID: 4420717746843372658, guid: 74681e7af2070c44d975a3239081639f, type: 3}
+    - {fileID: 8114612476201676764, guid: 3199f9bd05aed3c4ca7a134a4cc69662, type: 3}
+    - {fileID: 1443147598915592303, guid: 527fecd63a036314bb26d31b2e43314b, type: 3}
+    - {fileID: 7965708310138269017, guid: fd3b5e1cbf05cbe4cb830133b67fc890, type: 3}
+  - minSize: 12
+    maxSize: 18
+    floorTile: {fileID: 11400000, guid: acf2160654601d84982c1d706b615e12, type: 2}
+    wallTile: {fileID: 11400000, guid: 04f2b5c41a7fe8347802e94eede98965, type: 2}
+    decorations:
+    - {fileID: 26613817450154302, guid: 012d1f0bed9fe7640b91bd5ba4d7918f, type: 3}
+    - {fileID: 7429008537786335947, guid: 4369155d07b15e84693d103a48e1a885, type: 3}
+    - {fileID: 5126326478367795037, guid: b2c61c3df5654264aaf09dcaf6bca30a, type: 3}
+    - {fileID: 3675976815138509765, guid: bb4d8674779b2594b960e36b57d7a56a, type: 3}
+    - {fileID: 580987777515762807, guid: d600bd8450ee74a49a0c4e2681d6a329, type: 3}
+  corridors:
+  - minSize: 1
+    maxSize: 1
+    floorTile: {fileID: 11400000, guid: acf2160654601d84982c1d706b615e12, type: 2}
+    wallTile: {fileID: 11400000, guid: 04f2b5c41a7fe8347802e94eede98965, type: 2}
+  chest: {fileID: 9206484102621668194, guid: 8894e6ba3c57df34f821dd5457aad9be, type: 3}
+  traps: []
+  specialObjects: []

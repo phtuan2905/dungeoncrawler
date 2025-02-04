@@ -1,18 +1,37 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.Progress;
 
 public class ChestInteract : MonoBehaviour
 {
     [SerializeField] private Transform chestUIManager;
     [SerializeField] private GameObject chestUI;
     [SerializeField] private GameObject itemUIPrefab;
+    [SerializeField] private ItemsPoolSO itemsPool;
 
 
     private void Awake()
     {
         chestUIManager = GameObject.Find("UI/Safe Area/Chest UI Manager").transform;
+        AddRandomItems();
         CreateUI();
+    }
+
+    void AddRandomItems()
+    {
+        int randomTotal = Random.Range(1, 6);
+        for (int i = 0; i < randomTotal; i++)
+        {
+            int randomIndex = Random.Range(0, itemsPool.items.Count);
+            GameObject itemClone = Instantiate(itemsPool.items[randomIndex], transform);
+            itemClone.transform.position = transform.position;
+            itemClone.name = itemsPool.items[randomIndex].name;
+            itemClone.SetActive(false);
+            itemClone.GetComponent<BoxCollider2D>().enabled = false;
+            itemClone.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
+            itemClone.GetComponent<ItemStats>().stack = Random.Range(1, itemClone.GetComponent<ItemStats>().maxStack + 1);
+        }
     }
 
     void CreateUI()
@@ -26,8 +45,6 @@ public class ChestInteract : MonoBehaviour
 
             }
         }
-
-        //Random Add Item
 
         foreach (Transform item in transform)
         {
